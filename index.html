@@ -1,0 +1,205 @@
+<html>
+	<head>
+		<style>
+			html, body { margin: 0; padding: 0; }
+		</style>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	</head>
+	<body>
+		<div class="divcalendar"></div>
+
+		<div id="calendaroverallcontrols">
+			<!-- <div id="year"></div> -->
+
+			<div id="calendarmonthcontrols">
+				<a id="btnPrevYr" href="#" title="Previous Year"><span><<</span></a>
+
+				<a id="btnPrev" href="#" title="Previous Month"><span><</span></a>
+
+				<div id="monthandyear"></div>
+
+				<a id="btnNext" href="#" title="Next Month"><span>></span></a>
+
+				<a id="btnNextYr" href="#" title="Next Year"><span>>></span></a>      
+			</div>
+		</div>
+
+		<div id="divcalendartable"></div>
+		<script>
+			var Scheduler = (function (element, userConfigs) {
+				configs = {
+					date: new Date(),
+					data: [],
+					shortDate: true,
+					mode: 'month'
+				};
+				
+				days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+				shortDays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+				months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+				
+				init = function () {
+					createToolBar();
+					if (configs.mode == 'month') {
+						createMonth(configs.data);
+					}
+				};
+				
+				refresh = function (data) {
+					createBody(data);
+				};
+				
+				createToolBar = function () {
+					var $divToolbar = $(document.createElement('div'));
+					
+					var $divLeft = $(document.createElement('div'));
+					var $divBtnGroup = $(document.createElement('div'));
+					var $btn = $(document.createElement('button'));
+					$btn.html('<span><</span>');
+					$divBtnGroup.append($btn);
+					$btn = $(document.createElement('button'));
+					$btn.html('<span>></span>');
+					$divBtnGroup.append($btn);
+					$divLeft.append($divBtnGroup);
+					
+					var $divCenter = $(document.createElement('div'));
+					$divCenter.html('<span>' + months[configs.date.getMonth()] + '</span>');
+					
+					var $divRight = $(document.createElement('div'));
+					$divBtnGroup = $(document.createElement('div'));
+					$btn = $(document.createElement('button'));
+					$btn.html('<span>month</span>');
+					$divBtnGroup.append($btn);
+					$btn = $(document.createElement('button'));
+					$btn.html('<span>week</span>');
+					$divBtnGroup.append($btn);
+					$btn = $(document.createElement('button'));
+					$btn.html('<span>day</span>');
+					$divBtnGroup.append($btn);
+					$divRight.append($divBtnGroup);
+					
+					$divToolbar.append($divLeft);
+					$divToolbar.append($divCenter);
+					$divToolbar.append($divRight);
+					$element.append($divToolbar);
+				}
+				
+				createMonth = function (data) {
+					var $divContain = $(document.createElement('div'));
+					$divContain.addClass('sc-container');
+					var $tblCalendar = $(document.createElement('table'));
+					var $thdCalendar = $(document.createElement('thead'));
+					$thdCalendar.addClass('sc-head');
+					var $trCalendar = $(document.createElement('tr'));
+					var $tdCalendar = $(document.createElement('td'));
+					
+					createMonthHeader($tdCalendar);
+					
+					$trCalendar.append($tdCalendar);
+					$thdCalendar.append($trCalendar);
+					$tblCalendar.append($thdCalendar);
+					
+					var $tbdCalendar = $(document.createElement('tbody'));
+					$tbdCalendar.addClass('sc-body');
+					$trCalendar = $(document.createElement('tr'));
+					$tdCalendar = $(document.createElement('td'));
+					
+					createMonthBody($tdCalendar, data);
+					
+					$trCalendar.append($tdCalendar);
+					$tbdCalendar.append($trCalendar);
+					$tblCalendar.append($tbdCalendar);
+					$divContain.append($tblCalendar);
+					
+					$element.append($divContain);
+				};
+				
+				createMonthHeader = function ($parent) {
+					var $divHeader = $(document.createElement('div'));
+					var $tblHeader = $(document.createElement('table'));
+					var $thdHeader = $(document.createElement('thead'));
+					var $trHeader = $(document.createElement('tr'));
+					
+					for (var i = 0; i < 7; i++) {
+						var $thHeader = $(document.createElement('th'));
+						$thHeader.html('<span>' + (configs.shortDate ? shortDays[i] : days[i]) + '</span>');
+						$trHeader.append($thHeader);
+					}
+					$thdHeader.append($trHeader);
+					$tblHeader.append($thdHeader);
+					$divHeader.append($tblHeader);
+					$parent.append($divHeader);
+				};
+				
+				createMonthBody = function ($parent, data) {
+					var firstDateMonth = new Date(configs.date.getFullYear(), configs.date.getMonth(), 1);
+					var lastDateMonth = new Date(configs.date.getFullYear(), configs.date.getMonth() + 1, 0);
+					
+					var calendarStartDate = new Date(firstDateMonth);
+					calendarStartDate.setDate(calendarStartDate.getDate() - (firstDateMonth.getDay() % 7));
+					
+					
+					var calendarEndDate = new Date(lastDateMonth);
+					calendarEndDate.setDate(calendarEndDate.getDate() + (6 - lastDateMonth.getDay()));
+					
+					var currentDate = calendarStartDate;
+					
+					while (currentDate <= calendarEndDate) {
+						var $divBody = $(document.createElement('div'));
+						var $tblCalendarBody = $(document.createElement('table'));
+						var $tbdCalendarBody = $(document.createElement('tbody'));
+						var $trCalendarBody = $(document.createElement('tr'));
+						
+						for (var i = 0; i < 7; i++) {
+							var $tdCalendarBody = $(document.createElement('td'));
+							$tdCalendarBody.addClass('sc-' + shortDays[currentDate.getDay()]);
+							$tdCalendarBody.attr('data-goto', currentDate.toDateString());
+							
+							if (currentDate.getMonth() != configs.date.getMonth()) {
+								$tdCalendarBody.addClass('sc-other-month');
+							}
+							
+							$tdCalendarBody.html('<a data-goto="' + currentDate.toDateString() + '">' + currentDate.getDate() + '</a>');
+							$trCalendarBody.append($tdCalendarBody);
+							currentDate.setDate(currentDate.getDate() + 1);
+						}
+						
+						$tbdCalendarBody.append($trCalendarBody);
+						$tblCalendarBody.append($tbdCalendarBody);
+						$divBody.append($tblCalendarBody);
+						$parent.append($divBody);
+					}
+				};
+				
+				createFooter = function () {
+				};
+				
+				init();
+				
+				return {
+					element: element,
+					refresh: refresh
+				};
+			});
+			
+			$.fn.scheduler = function (configs) {
+				$element = $(this);
+				var scheduler = $element.data('scheduler');
+				
+				if (scheduler) {
+					
+				}
+				else if (!scheduler) {
+					scheduler = new Scheduler(this, configs);
+					$element.data('scheduler', scheduler);
+				}
+				
+
+				return scheduler;
+			};
+		</script>
+		<script>
+			$('.divcalendar').scheduler({ test: true });
+		</script>
+	</body>
+</html>
