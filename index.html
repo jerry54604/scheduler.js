@@ -19,35 +19,52 @@
 				days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 				shortDays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 				months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+				$currentView = $(document.createElement('div'));
+				$divToolbar = $(document.createElement('div'));
 				
 				init = function () {
-					createToolBar();
+					renderToolBar();
+					$currentView.addClass('sc-view');
+					renderBody();
+					$element.append($currentView);
+				};
+				
+				refreshView = function (data) {
+					refreshToolbarTitle();
+					clearBody();
+					renderBody(data);
+				};
+				
+				refreshToolbarTitle = function () {
+					$divToolbar.find('.sc-center').html('<span>' + months[configs.date.getMonth()] + ', ' + configs.date.getFullYear() + '</span>');
+				}
+				
+				renderBody = function () {
 					if (configs.mode == 'month') {
-						createMonth(configs.data);
+						renderMonth(configs.data);
 					}
 				};
 				
-				refresh = function (data) {
-					createBody(data);
-				};
-				
-				createToolBar = function () {
-					var $divToolbar = $(document.createElement('div'));
-					
+				renderToolBar = function () {
 					var $divLeft = $(document.createElement('div'));
+					$divLeft.addClass('sc-left');
 					var $divBtnGroup = $(document.createElement('div'));
 					var $btn = $(document.createElement('button'));
 					$btn.html('<span><</span>');
+					$btn.on('click', prevMonth);
 					$divBtnGroup.append($btn);
 					$btn = $(document.createElement('button'));
 					$btn.html('<span>></span>');
+					$btn.on('click', nextMonth);
 					$divBtnGroup.append($btn);
 					$divLeft.append($divBtnGroup);
 					
 					var $divCenter = $(document.createElement('div'));
-					$divCenter.html('<span>' + months[configs.date.getMonth()] + '</span>');
+					$divCenter.addClass('sc-center');
+					$divCenter.html('<span>' + months[configs.date.getMonth()] + ', ' + configs.date.getFullYear() + '</span>');
 					
 					var $divRight = $(document.createElement('div'));
+					$divRight.addClass('sc-right');
 					$divBtnGroup = $(document.createElement('div'));
 					$btn = $(document.createElement('button'));
 					$btn.html('<span>month</span>');
@@ -66,16 +83,16 @@
 					$element.append($divToolbar);
 				}
 				
-				createMonth = function (data) {
-					var $divContain = $(document.createElement('div'));
-					$divContain.addClass('sc-container');
+				renderMonth = function (data) {
+					var $divWrapper = $(document.createElement('div'));
+					$divWrapper.addClass('sc-month-wrapper');
 					var $tblCalendar = $(document.createElement('table'));
 					var $thdCalendar = $(document.createElement('thead'));
 					$thdCalendar.addClass('sc-head');
 					var $trCalendar = $(document.createElement('tr'));
 					var $tdCalendar = $(document.createElement('td'));
 					
-					createMonthHeader($tdCalendar);
+					renderMonthHeader($tdCalendar);
 					
 					$trCalendar.append($tdCalendar);
 					$thdCalendar.append($trCalendar);
@@ -86,17 +103,17 @@
 					$trCalendar = $(document.createElement('tr'));
 					$tdCalendar = $(document.createElement('td'));
 					
-					createMonthBody($tdCalendar, data);
+					renderMonthBody($tdCalendar, data);
 					
 					$trCalendar.append($tdCalendar);
 					$tbdCalendar.append($trCalendar);
 					$tblCalendar.append($tbdCalendar);
-					$divContain.append($tblCalendar);
+					$divWrapper.append($tblCalendar);
 					
-					$element.append($divContain);
+					$currentView.append($divWrapper);
 				};
 				
-				createMonthHeader = function ($parent) {
+				renderMonthHeader = function ($parent) {
 					var $divHeader = $(document.createElement('div'));
 					var $tblHeader = $(document.createElement('table'));
 					var $thdHeader = $(document.createElement('thead'));
@@ -113,7 +130,7 @@
 					$parent.append($divHeader);
 				};
 				
-				createMonthBody = function ($parent, data) {
+				renderMonthBody = function ($parent, data) {
 					var firstDateMonth = new Date(configs.date.getFullYear(), configs.date.getMonth(), 1);
 					var lastDateMonth = new Date(configs.date.getFullYear(), configs.date.getMonth() + 1, 0);
 					
@@ -153,14 +170,30 @@
 					}
 				};
 				
-				createFooter = function () {
+				renderFooter = function () {
+				};
+				
+				clearBody = function () {
+					$currentView.empty();
+				};
+				
+				prevMonth = function () {
+					configs.date.setMonth(configs.date.getMonth() - 1);
+					refreshView();
+				};
+				
+				nextMonth = function () {
+					configs.date.setMonth(configs.date.getMonth() + 1);
+					refreshView();
 				};
 				
 				init();
 				
 				return {
 					element: element,
-					refresh: refresh
+					refreshView: refreshView,
+					prevMonth: prevMonth,
+					nextMonth: nextMonth
 				};
 			});
 			
