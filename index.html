@@ -42,6 +42,27 @@
 					if (configs.mode == 'month') {
 						$divToolbar.find('.sc-center').html('<span>' + months[renderDate.getMonth()] + ', ' + renderDate.getFullYear() + '</span>');
 					}
+					else if (configs.mode == 'week') {
+						var first = renderDate.getDate() - renderDate.getDay(); // First day is the day of the month - the day of the week
+						var last = first + 6; // last day is the first day + 6
+						
+						var firstDay = new Date(renderDate);
+						firstDay.setDate(first)
+						var lastDay = new Date(renderDate);
+						lastDay.setDate(last);
+
+						$divToolbar.find('.sc-center').html('<span>' + firstDay.getDate() 
+							+ (firstDay.getMonth() != lastDay.getMonth() ? ' ' + (configs.shortDate ? months[firstDay.getMonth()] : months[firstDay.getMonth()]) : '' ) 
+							+ (firstDay.getFullYear() != lastDay.getFullYear() ? ' ' + firstDay.getFullYear() : '')
+							+ ' - ' + lastDay.getDate() + ' ' + months[lastDay.getMonth()] + ', ' + lastDay.getFullYear() + '</span>');
+					}
+					else if (configs.mode == 'day') {
+						var first = renderDate.getDate() - renderDate.getDay(); // First day is the day of the month - the day of the week
+						var last = first + 6; // last day is the first day + 6
+
+						$divToolbar.find('.sc-center').html('<span>' + (configs.shortDate ? shortDays[renderDate.getDay()] : days[renderDate.getDay()]) + ', ' 
+							+ renderDate.getDate() + ' ' + months[renderDate.getMonth()] + ', ' + renderDate.getFullYear() + '</span>');
+					}
 				};
 				
 				renderBody = function () {
@@ -50,6 +71,9 @@
 					}
 					else if (configs.mode == 'week') {
 						renderWeek(configs.data);
+					}
+					else if (configs.mode == 'day') {
+						renderDay(configs.data);
 					}
 				};
 				
@@ -61,12 +85,12 @@
 					var $divBtnGroup = $(document.createElement('div'));
 					var $btn = $(document.createElement('button'));
 					$btn.html('<span><</span>');
-					$btn.on('click', prevMonth);
+					$btn.on('click', prevView);
 					$divBtnGroup.append($btn);
 					
 					$btn = $(document.createElement('button'));
 					$btn.html('<span>></span>');
-					$btn.on('click', nextMonth);
+					$btn.on('click', nextView);
 					
 					$divBtnGroup.append($btn);
 					$divLeft.append($divBtnGroup);
@@ -91,6 +115,7 @@
 					$divBtnGroup.append($btn);
 					$btn = $(document.createElement('button'));
 					$btn.html('<span>day</span>');
+					$btn.on('click', setDayMode);
 					
 					$divBtnGroup.append($btn);
 					$divRight.append($divBtnGroup);
@@ -288,6 +313,98 @@
 					$parent.append($divTimeBody);
 				};
 				
+				renderDay = function (data) {
+					var $divWrapper = $(document.createElement('div'));
+					$divWrapper.addClass('sc-day-wrapper');
+					
+					var $tblCalendar = $(document.createElement('table'));
+					var $thdCalendar = $(document.createElement('thead'));
+					$thdCalendar.addClass('sc-day-head');
+					var $trCalendar = $(document.createElement('tr'));
+					var $tdCalendar = $(document.createElement('td'));
+					
+					renderDayHeader($tdCalendar);
+					
+					$trCalendar.append($tdCalendar);
+					$thdCalendar.append($trCalendar);
+					$tblCalendar.append($thdCalendar);
+					
+					var $tbdCalendar = $(document.createElement('tbody'));
+					$tbdCalendar.addClass('sc-day-body');
+					$trCalendar = $(document.createElement('tr'));
+					$tdCalendar = $(document.createElement('td'));
+					
+					renderDayBody($tdCalendar, data);
+					
+					$trCalendar.append($tdCalendar);
+					$tbdCalendar.append($trCalendar);
+					$tblCalendar.append($tbdCalendar);
+					$divWrapper.append($tblCalendar);
+					
+					$currentView.append($divWrapper);
+				};
+				
+				renderDayHeader = function ($parent) {
+					var $divHeader = $(document.createElement('div'));
+					var $tblHeader = $(document.createElement('table'));
+					var $thdHeader = $(document.createElement('thead'));
+					var $trHeader = $(document.createElement('tr'));
+					
+					var $thHeader = $(document.createElement('th'));
+					$trHeader.append($thHeader);
+					
+					$thHeader = $(document.createElement('th'));
+					$thHeader.html('<span>' + (configs.shortDate ? shortDays[renderDate.getDay()] : days[renderDate.getDay()]) + ' '
+						+ (renderDate.getMonth() + 1) + '/' + renderDate.getDate() + '</span>');
+					$trHeader.append($thHeader);
+					
+					$thdHeader.append($trHeader);
+					$tblHeader.append($thdHeader);
+					$divHeader.append($tblHeader);
+				};
+				
+				renderDayBody = function ($parent, data) {
+					var $divAllDay = $(document.createElement('div'));
+					var $tblAllDay = $(document.createElement('table'));
+					var $thdAllDay = $(document.createElement('thead'));
+					var $trAllDay = $(document.createElement('tr'));
+					
+					var $tdAllDay = $(document.createElement('td'));
+					$tdAllDay.html('<span>all day</span>');
+					$trAllDay.append($tdAllDay);
+					
+					$tdAllDay = $(document.createElement('td'));
+					$trAllDay.append($tdAllDay);
+					
+					$thdAllDay.append($trAllDay);
+					$tblAllDay.append($thdAllDay);
+					$divAllDay.append($tblAllDay);
+					$parent.append($divAllDay);
+					
+					var $divTimeBody = $(document.createElement('div'));
+					var $tblTimeBody = $(document.createElement('table'));
+					var $tbdTimeBody = $(document.createElement('tbody'));
+					
+					for (var i = 0; i < 48; i++) {
+						var $trTimeBody = $(document.createElement('tr'));
+						var $tdTimeBody = $(document.createElement('td'));
+						if (i % 2 == 0) {
+							var time = ((i % 24) / 2);
+							time = ((time == 0) ? 12 : time);
+							$tdTimeBody.html('<span>' + time + (i < 24 ? 'am' : 'pm') + '</span>');
+						}
+						$trTimeBody.append($tdTimeBody);
+						
+						$tdTimeBody = $(document.createElement('td'));
+						$trTimeBody.append($tdTimeBody);
+						
+						$tbdTimeBody.append($trTimeBody);
+					}
+					$tblTimeBody.append($tbdTimeBody);
+					$divTimeBody.append($tblTimeBody);
+					$parent.append($divTimeBody);
+				};
+				
 				renderFooter = function () {
 				};
 				
@@ -295,13 +412,29 @@
 					$currentView.empty();
 				};
 				
-				prevMonth = function () {
-					renderDate.setMonth(renderDate.getMonth() - 1);
+				prevView = function () {
+					if (configs.mode == 'month') {
+						renderDate.setMonth(renderDate.getMonth() - 1);
+					}
+					else if (configs.mode == 'week') {
+						renderDate.setDate(renderDate.getDate() - 7);
+					}
+					else if (configs.mode == 'day') {
+						renderDate.setDate(renderDate.getDate() - 1);
+					}
 					refreshView();
 				};
 				
-				nextMonth = function () {
-					renderDate.setMonth(renderDate.getMonth() + 1);
+				nextView = function () {
+					if (configs.mode == 'month') {
+						renderDate.setMonth(renderDate.getMonth() + 1);
+					}
+					else if (configs.mode == 'week') {
+						renderDate.setDate(renderDate.getDate() + 7);
+					}
+					else if (configs.mode == 'day') {
+						renderDate.setDate(renderDate.getDate() + 1);
+					}
 					refreshView();
 				};
 				
@@ -319,13 +452,20 @@
 					}
 				};
 				
+				setDayMode = function () {
+					if (configs.mode != 'day') {
+						configs.mode = 'day';
+						refreshView();
+					}
+				};
+				
 				init();
 				
 				return {
 					element: element,
 					refreshView: refreshView,
-					prevMonth: prevMonth,
-					nextMonth: nextMonth
+					prevView: prevView,
+					nextView: nextView
 				};
 			});
 			
