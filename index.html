@@ -86,7 +86,7 @@
 				
 				refreshToolbarTitle = function () {
 					if (configs.mode == 'month') {
-						$divToolbar.find('.sc-center').html('<span>' + months[renderDate.getMonth()] + ', ' + renderDate.getFullYear() + '</span>');
+						$divToolbar.find('.sc-center').html('<span>' + getMonthString(renderDate.getMonth()) + ', ' + renderDate.getFullYear() + '</span>');
 					}
 					else if (configs.mode == 'week') {
 						var first = renderDate.getDate() - renderDate.getDay(); // First day is the day of the month - the day of the week
@@ -100,14 +100,14 @@
 						$divToolbar.find('.sc-center').html('<span>' + firstDay.getDate() 
 							+ (firstDay.getMonth() != lastDay.getMonth() ? ' ' + getMonthString(firstDay.getMonth()) : '' ) 
 							+ (firstDay.getFullYear() != lastDay.getFullYear() ? ' ' + firstDay.getFullYear() : '')
-							+ ' - ' + lastDay.getDate() + ' ' + months[lastDay.getMonth()] + ', ' + lastDay.getFullYear() + '</span>');
+							+ ' - ' + lastDay.getDate() + ' ' + getMonthString(lastDay.getMonth()) + ', ' + lastDay.getFullYear() + '</span>');
 					}
 					else if (configs.mode == 'day') {
 						var first = renderDate.getDate() - renderDate.getDay(); // First day is the day of the month - the day of the week
 						var last = first + 6; // last day is the first day + 6
 
 						$divToolbar.find('.sc-center').html('<span>' + getDayString(renderDate.getDay()) + ', ' 
-							+ renderDate.getDate() + ' ' + months[renderDate.getMonth()] + ', ' + renderDate.getFullYear() + '</span>');
+							+ renderDate.getDate() + ' ' + getMonthString(renderDate.getMonth()) + ', ' + renderDate.getFullYear() + '</span>');
 					}
 				};
 				
