@@ -12,7 +12,8 @@
 				configs = {
 					date: new Date(),
 					data: [],
-					shortDate: true,
+					shortDay: true,
+					shortMonth: false,
 					mode: 'month'
 				};
 				
@@ -52,7 +53,7 @@
 						lastDay.setDate(last);
 
 						$divToolbar.find('.sc-center').html('<span>' + firstDay.getDate() 
-							+ (firstDay.getMonth() != lastDay.getMonth() ? ' ' + (configs.shortDate ? months[firstDay.getMonth()] : months[firstDay.getMonth()]) : '' ) 
+							+ (firstDay.getMonth() != lastDay.getMonth() ? ' ' + getMonthString(firstDay.getMonth()) : '' ) 
 							+ (firstDay.getFullYear() != lastDay.getFullYear() ? ' ' + firstDay.getFullYear() : '')
 							+ ' - ' + lastDay.getDate() + ' ' + months[lastDay.getMonth()] + ', ' + lastDay.getFullYear() + '</span>');
 					}
@@ -60,7 +61,7 @@
 						var first = renderDate.getDate() - renderDate.getDay(); // First day is the day of the month - the day of the week
 						var last = first + 6; // last day is the first day + 6
 
-						$divToolbar.find('.sc-center').html('<span>' + (configs.shortDate ? shortDays[renderDate.getDay()] : days[renderDate.getDay()]) + ', ' 
+						$divToolbar.find('.sc-center').html('<span>' + getDayString(renderDate.getDay()) + ', ' 
 							+ renderDate.getDate() + ' ' + months[renderDate.getMonth()] + ', ' + renderDate.getFullYear() + '</span>');
 					}
 				};
@@ -97,7 +98,7 @@
 					
 					var $divCenter = $(document.createElement('div'));
 					$divCenter.addClass('sc-center');
-					$divCenter.html('<span>' + months[renderDate.getMonth()] + ', ' + renderDate.getFullYear() + '</span>');
+					$divCenter.html('<span>' + getMonthString(renderDate.getMonth()) + ', ' + renderDate.getFullYear() + '</span>');
 					
 					var $divRight = $(document.createElement('div'));
 					$divRight.addClass('sc-right');
@@ -164,7 +165,7 @@
 					
 					for (var i = 0; i < 7; i++) {
 						var $thHeader = $(document.createElement('th'));
-						$thHeader.html('<span>' + (configs.shortDate ? shortDays[i] : days[i]) + '</span>');
+						$thHeader.html('<span>' + getDayString(i) + '</span>');
 						$trHeader.append($thHeader);
 					}
 					$thdHeader.append($trHeader);
@@ -258,7 +259,7 @@
 					
 					for (var i = 0; i < 7; i++) {
 						$thHeader = $(document.createElement('th'));
-						$thHeader.html('<span>' + (configs.shortDate ? shortDays[i] : days[i]) + ' ' + (firstDayWeek.getMonth() + 1) + '/' + firstDayWeek.getDate() + '</span>');
+						$thHeader.html('<span>' + getDayString(i) + ' ' + (firstDayWeek.getMonth() + 1) + '/' + firstDayWeek.getDate() + '</span>');
 						$trHeader.append($thHeader);
 						firstDayWeek.setDate(firstDayWeek.getDate() + 1);
 					}
@@ -354,13 +355,15 @@
 					$trHeader.append($thHeader);
 					
 					$thHeader = $(document.createElement('th'));
-					$thHeader.html('<span>' + (configs.shortDate ? shortDays[renderDate.getDay()] : days[renderDate.getDay()]) + ' '
+					$thHeader.html('<span>' + getDayString(renderDate.getDay()) + ' '
 						+ (renderDate.getMonth() + 1) + '/' + renderDate.getDate() + '</span>');
 					$trHeader.append($thHeader);
 					
 					$thdHeader.append($trHeader);
 					$tblHeader.append($thdHeader);
 					$divHeader.append($tblHeader);
+					
+					$parent.append($divHeader);
 				};
 				
 				renderDayBody = function ($parent, data) {
@@ -457,6 +460,14 @@
 						configs.mode = 'day';
 						refreshView();
 					}
+				};
+				
+				getDayString = function (day) {
+					return (configs.shortDay ? shortDays[day] : days[day]);
+				};
+				
+				getMonthString = function (month) {
+					return (configs.shortMonth ? months[month] : months[month]);
 				};
 				
 				init();
