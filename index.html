@@ -14,7 +14,7 @@
 				justify-content: space-between;
 			}
 			
-			.sc table {
+			.sc table, .sc .sc-table {
 				width: 100%;
 				box-sizing: border-box;
 				table-layout: fixed;
@@ -22,8 +22,39 @@
 				border-spacing: 0;
 			}
 			
-			.sc-day {
-				height: 30px;
+			.sc .sc-table {
+				display: table;
+				height: 100%;
+			}
+			
+			.sc .sc-table-row {
+				display: table-row;
+			}
+			
+			.sc .sc-table-row-th {
+				text-align: center;
+			}
+			
+			.sc .sc-table-row-th, .sc .sc-table-row-td {
+				display: table-cell;
+			}
+			
+			.sc-week-row {
+				position: relative;
+				overflow: hidden;
+				min-height: 30px;
+			}
+			
+			.sc-week-row-wrapper {
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+			}
+			
+			.sc-week-row-wrapper > table {
+				height: 100%;
 			}
 			
 			.sc-day > a {
@@ -35,7 +66,7 @@
 			}
 			
 			@media (min-width: 600px) {
-				.sc td, .sc th {
+				.sc td, .sc th, .sc .sc-table-row-th, .sc .sc-table-row-td {
 					border-style: solid;
 					border-width: 1px;
 					padding: 0;
@@ -43,8 +74,12 @@
 					border-color: #ddd;
 				}
 				
+				.sc-week-row {
+					height: 110px;
+				}
+				
 				.sc-day {
-					text-align: right;
+					text-align: right !important;
 				}
 			}
 		</style>
@@ -204,17 +239,18 @@
 				
 				renderMonthHeader = function ($parent) {
 					var $divHeader = $(document.createElement('div'));
-					var $tblHeader = $(document.createElement('table'));
-					var $thdHeader = $(document.createElement('thead'));
-					var $trHeader = $(document.createElement('tr'));
+					var $tblHeader = $(document.createElement('div'));
+					$tblHeader.addClass('sc-table');
+					var $trHeader = $(document.createElement('div'));
+					$trHeader.addClass('sc-table-row');
 					
 					for (var i = 0; i < 7; i++) {
-						var $thHeader = $(document.createElement('th'));
+						var $thHeader = $(document.createElement('div'));
+						$thHeader.addClass('sc-table-row-th');
 						$thHeader.html('<span>' + getDayString(i) + '</span>');
 						$trHeader.append($thHeader);
 					}
-					$thdHeader.append($trHeader);
-					$tblHeader.append($thdHeader);
+					$tblHeader.append($trHeader);
 					$divHeader.append($tblHeader);
 					$parent.append($divHeader);
 				};
@@ -233,13 +269,18 @@
 					var currentDate = calendarStartDate;
 					
 					while (currentDate <= calendarEndDate) {
-						var $divBody = $(document.createElement('div'));
-						var $tblCalendar = $(document.createElement('table'));
-						var $thdCalendar = $(document.createElement('thead'));
-						var $trCalendar = $(document.createElement('tr'));
+						var $divRow = $(document.createElement('div'));
+						$divRow.addClass('sc-week-row');
+						var $divWrapper = $(document.createElement('div'));
+						$divWrapper.addClass('sc-week-row-wrapper');
+						var $tblCalendar = $(document.createElement('div'));
+						$tblCalendar.addClass('sc-table');
+						var $trCalendar = $(document.createElement('div'));
+						$trCalendar.addClass('sc-table-row');
 						
 						for (var i = 0; i < 7; i++) {
-							var $thCalendar = $(document.createElement('th'));
+							var $thCalendar = $(document.createElement('div'));
+							$thCalendar.addClass('sc-table-row-th');
 							var $aCalendar = $(document.createElement('a'));
 							$thCalendar.addClass('sc-day');
 							$thCalendar.addClass('sc-' + shortDays[currentDate.getDay()]);
@@ -256,10 +297,10 @@
 							currentDate.setDate(currentDate.getDate() + 1);
 						}
 						
-						$thdCalendar.append($trCalendar);
-						$tblCalendar.append($thdCalendar);
-						$divBody.append($tblCalendar);
-						$parent.append($divBody);
+						$tblCalendar.append($trCalendar);
+						$divWrapper.append($tblCalendar);
+						$divRow.append($divWrapper);
+						$parent.append($divRow);
 					}
 				};
 				
@@ -296,55 +337,62 @@
 				
 				renderWeekHeader = function ($parent) {
 					var $divHeader = $(document.createElement('div'));
-					var $tblHeader = $(document.createElement('table'));
-					var $thdHeader = $(document.createElement('thead'));
-					var $trHeader = $(document.createElement('tr'));
+					var $tblHeader = $(document.createElement('div'));
+					$tblHeader.addClass('sc-table');
+					var $trHeader = $(document.createElement('div'));
+					$trHeader.addClass('sc-table-row');
 					
-					var $thHeader = $(document.createElement('th'));
+					
+					var $thHeader = $(document.createElement('div'));
+					$thHeader.addClass('sc-table-row-th');
 					$trHeader.append($thHeader);
 					
 					var firstDayWeek = new Date(renderDate);
 					firstDayWeek.setDate(firstDayWeek.getDate() - renderDate.getDay());
 					
 					for (var i = 0; i < 7; i++) {
-						$thHeader = $(document.createElement('th'));
+						$thHeader = $(document.createElement('div'));
+						$thHeader.addClass('sc-table-row-th');
 						$thHeader.html('<span>' + getDayString(i) + ' ' + (firstDayWeek.getMonth() + 1) + '/' + firstDayWeek.getDate() + '</span>');
 						$trHeader.append($thHeader);
 						firstDayWeek.setDate(firstDayWeek.getDate() + 1);
 					}
-					$thdHeader.append($trHeader);
-					$tblHeader.append($thdHeader);
+					$tblHeader.append($trHeader);
 					$divHeader.append($tblHeader);
 					$parent.append($divHeader);
 				};
 				
 				renderWeekBody = function ($parent, data) {
 					var $divAllDay = $(document.createElement('div'));
-					var $tblAllDay = $(document.createElement('table'));
-					var $thdAllDay = $(document.createElement('thead'));
-					var $trAllDay = $(document.createElement('tr'));
+					var $tblAllDay = $(document.createElement('div'));
+					$tblAllDay.addClass('sc-table');
+					var $trAllDay = $(document.createElement('div'));
+					$trAllDay.addClass('sc-table-row');
 					
-					var $tdAllDay = $(document.createElement('td'));
+					var $tdAllDay = $(document.createElement('div'));
+					$tdAllDay.addClass('sc-table-row-td');
 					$tdAllDay.html('<span>all day</span>');
 					$trAllDay.append($tdAllDay);
 					
 					for (var i = 0; i < 7; i++) {
-						$tdAllDay = $(document.createElement('td'));
+						$tdAllDay = $(document.createElement('div'));
+						$tdAllDay.addClass('sc-table-row-td');
 						$trAllDay.append($tdAllDay);
 					}
 					
-					$thdAllDay.append($trAllDay);
-					$tblAllDay.append($thdAllDay);
+					$tblAllDay.append($trAllDay);
 					$divAllDay.append($tblAllDay);
 					$parent.append($divAllDay);
 					
 					var $divTimeBody = $(document.createElement('div'));
-					var $tblTimeBody = $(document.createElement('table'));
-					var $tbdTimeBody = $(document.createElement('tbody'));
+					var $tblTimeBody = $(document.createElement('div'));
+					$tblTimeBody.addClass('sc-table');
 					
 					for (var i = 0; i < 48; i++) {
-						var $trTimeBody = $(document.createElement('tr'));
-						var $tdTimeBody = $(document.createElement('td'));
+						var $trTimeBody = $(document.createElement('div'));
+						$trTimeBody.addClass('sc-table-row');
+						var $tdTimeBody = $(document.createElement('div'));
+						$tdTimeBody.addClass('sc-table-row-td');
 						if (i % 2 == 0) {
 							var time = ((i % 24) / 2);
 							time = ((time == 0) ? 12 : time);
@@ -353,12 +401,12 @@
 						$trTimeBody.append($tdTimeBody);
 						
 						for (var j = 0; j < 7; j++) {
-							$tdTimeBody = $(document.createElement('td'));
+							$tdTimeBody = $(document.createElement('div'));
+							$tdTimeBody.addClass('sc-table-row-td');
 							$trTimeBody.append($tdTimeBody);
 						}
-						$tbdTimeBody.append($trTimeBody);
+						$tblTimeBody.append($trTimeBody);
 					}
-					$tblTimeBody.append($tbdTimeBody);
 					$divTimeBody.append($tblTimeBody);
 					$parent.append($divTimeBody);
 				};
@@ -396,20 +444,22 @@
 				
 				renderDayHeader = function ($parent) {
 					var $divHeader = $(document.createElement('div'));
-					var $tblHeader = $(document.createElement('table'));
-					var $thdHeader = $(document.createElement('thead'));
-					var $trHeader = $(document.createElement('tr'));
+					var $tblHeader = $(document.createElement('div'));
+					$tblHeader.addClass('sc-table');
+					var $trHeader = $(document.createElement('div'));
+					$trHeader.addClass('sc-table-row');
 					
-					var $thHeader = $(document.createElement('th'));
+					var $thHeader = $(document.createElement('div'));
+					$thHeader.addClass('sc-table-row-th');
 					$trHeader.append($thHeader);
 					
-					$thHeader = $(document.createElement('th'));
+					$thHeader = $(document.createElement('div'));
+					$thHeader.addClass('sc-table-row-th');
 					$thHeader.html('<span>' + getDayString(renderDate.getDay()) + ' '
 						+ (renderDate.getMonth() + 1) + '/' + renderDate.getDate() + '</span>');
 					$trHeader.append($thHeader);
 					
-					$thdHeader.append($trHeader);
-					$tblHeader.append($thdHeader);
+					$tblHeader.append($trHeader);
 					$divHeader.append($tblHeader);
 					
 					$parent.append($divHeader);
@@ -417,29 +467,33 @@
 				
 				renderDayBody = function ($parent, data) {
 					var $divAllDay = $(document.createElement('div'));
-					var $tblAllDay = $(document.createElement('table'));
-					var $thdAllDay = $(document.createElement('thead'));
-					var $trAllDay = $(document.createElement('tr'));
+					var $tblAllDay = $(document.createElement('div'));
+					$tblAllDay.addClass('sc-table');
+					var $trAllDay = $(document.createElement('div'));
+					$trAllDay.addClass('sc-table-row');
 					
-					var $tdAllDay = $(document.createElement('td'));
+					var $tdAllDay = $(document.createElement('div'));
+					$tdAllDay.addClass('sc-table-row-td');
 					$tdAllDay.html('<span>all day</span>');
 					$trAllDay.append($tdAllDay);
 					
-					$tdAllDay = $(document.createElement('td'));
+					$tdAllDay = $(document.createElement('div'));
+					$tdAllDay.addClass('sc-table-row-td');
 					$trAllDay.append($tdAllDay);
 					
-					$thdAllDay.append($trAllDay);
-					$tblAllDay.append($thdAllDay);
+					$tblAllDay.append($trAllDay);
 					$divAllDay.append($tblAllDay);
 					$parent.append($divAllDay);
 					
 					var $divTimeBody = $(document.createElement('div'));
-					var $tblTimeBody = $(document.createElement('table'));
-					var $tbdTimeBody = $(document.createElement('tbody'));
+					var $tblTimeBody = $(document.createElement('div'));
+					$tblTimeBody.addClass('sc-table');
 					
 					for (var i = 0; i < 48; i++) {
-						var $trTimeBody = $(document.createElement('tr'));
-						var $tdTimeBody = $(document.createElement('td'));
+						var $trTimeBody = $(document.createElement('div'));
+						$trTimeBody.addClass('sc-table-row');
+						var $tdTimeBody = $(document.createElement('div'));
+						$tdTimeBody.addClass('sc-table-row-td');
 						if (i % 2 == 0) {
 							var time = ((i % 24) / 2);
 							time = ((time == 0) ? 12 : time);
@@ -447,12 +501,12 @@
 						}
 						$trTimeBody.append($tdTimeBody);
 						
-						$tdTimeBody = $(document.createElement('td'));
+						$tdTimeBody = $(document.createElement('div'));
+						$tdTimeBody.addClass('sc-table-row-td');
 						$trTimeBody.append($tdTimeBody);
 						
-						$tbdTimeBody.append($trTimeBody);
+						$tblTimeBody.append($trTimeBody);
 					}
-					$tblTimeBody.append($tbdTimeBody);
 					$divTimeBody.append($tblTimeBody);
 					$parent.append($divTimeBody);
 				};
