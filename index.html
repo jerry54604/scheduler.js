@@ -3,6 +3,46 @@
 		<style>
 			html, body { margin: 0; padding: 0; }
 		</style>
+		<style>
+			.sc {
+				box-sizing: content-box;
+			}
+		
+			.sc-toolbar {
+				display: flex;
+				justify-content: space-between;
+			}
+			
+			.sc table {
+				width: 100%;
+				box-sizing: border-box;
+				table-layout: fixed;
+				border-collapse: collapse;
+				border-spacing: 0;
+			}
+			
+			.sc td, .sc th {
+				vertical-align: top;
+			}
+			
+			.sc-day > a {
+				padding: 2px;
+			}
+			
+			@media (min-width: 600px) {
+				.sc td, .sc th {
+					border-style: solid;
+					border-width: 1px;
+					padding: 0;
+					vertical-align: top;
+					border-color: #ddd;
+				}
+				
+				.sc-day {
+					text-align: right;
+				}
+			}
+		</style>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 	</head>
 	<body>
@@ -189,27 +229,31 @@
 					
 					while (currentDate <= calendarEndDate) {
 						var $divBody = $(document.createElement('div'));
-						var $tblCalendarBody = $(document.createElement('table'));
-						var $tbdCalendarBody = $(document.createElement('tbody'));
-						var $trCalendarBody = $(document.createElement('tr'));
+						var $tblCalendar = $(document.createElement('table'));
+						var $thdCalendar = $(document.createElement('thead'));
+						var $trCalendar = $(document.createElement('tr'));
 						
 						for (var i = 0; i < 7; i++) {
-							var $tdCalendarBody = $(document.createElement('td'));
-							$tdCalendarBody.addClass('sc-' + shortDays[currentDate.getDay()]);
-							$tdCalendarBody.attr('data-goto', currentDate.toDateString());
+							var $thCalendar = $(document.createElement('th'));
+							var $aCalendar = $(document.createElement('a'));
+							$thCalendar.addClass('sc-day');
+							$thCalendar.addClass('sc-' + shortDays[currentDate.getDay()]);
+							$thCalendar.attr('data-goto', currentDate.toDateString());
 							
 							if (currentDate.getMonth() != renderDate.getMonth()) {
-								$tdCalendarBody.addClass('sc-other-month');
+								$thCalendar.addClass('sc-other-month');
 							}
 							
-							$tdCalendarBody.html('<a data-goto="' + currentDate.toDateString() + '">' + currentDate.getDate() + '</a>');
-							$trCalendarBody.append($tdCalendarBody);
+							$aCalendar.html(currentDate.getDate());
+							$aCalendar.attr('data-goto', currentDate.toDateString());
+							$thCalendar.append($aCalendar);
+							$trCalendar.append($thCalendar);
 							currentDate.setDate(currentDate.getDate() + 1);
 						}
 						
-						$tbdCalendarBody.append($trCalendarBody);
-						$tblCalendarBody.append($tbdCalendarBody);
-						$divBody.append($tblCalendarBody);
+						$thdCalendar.append($trCalendar);
+						$tblCalendar.append($thdCalendar);
+						$divBody.append($tblCalendar);
 						$parent.append($divBody);
 					}
 				};
