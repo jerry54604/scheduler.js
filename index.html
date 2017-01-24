@@ -657,11 +657,10 @@
 					}
 				};
 				
-				setMonthEvent = function (event, $parent) {
+				setMonthEvent = function (event, $parent = $('.sc .sc-month-body')) {
 					var start = new Date(event.start),
 						end = new Date(event.end),
 						title = event.title,
-						$parent = $parent || $('.sc .sc-month-body'),
 						$divEvent = $(document.createElement('div'));
 						$divEvent.html(start.toLocaleTimeString() + title);
 					
