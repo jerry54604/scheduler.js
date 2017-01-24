@@ -81,7 +81,7 @@
 			}
 			
 			@media (min-width: 600px) {
-				.sc td, .sc th, .sc .sc-table-row-th, .sc .sc-table-row-td {
+				.sc .sc-table-row-th, .sc .sc-table-row-td {
 					border-style: solid;
 					border-width: 1px;
 					padding: 0;
@@ -99,6 +99,11 @@
 				
 				.sc .sc-day {
 					text-align: right !important;
+				}
+				
+				.sc .sc-event-row-wrapper {
+					position: absolute;
+					top: 21px;
 				}
 			}
 		</style>
@@ -253,7 +258,7 @@
 					$trCalendar = $(document.createElement('tr'));
 					$tdCalendar = $(document.createElement('td'));
 					
-					renderMonthBody($tdCalendar, data);
+					renderMonthBody($tdCalendar);
 					
 					$trCalendar.append($tdCalendar);
 					$tbdCalendar.append($trCalendar);
@@ -261,6 +266,7 @@
 					$divWrapper.append($tblCalendar);
 					
 					$currentView.append($divWrapper);
+					renderMonthEvent($tdCalendar, data);
 				};
 				
 				renderMonthHeader = function ($parent) {
@@ -281,13 +287,12 @@
 					$parent.append($divHeader);
 				};
 				
-				renderMonthBody = function ($parent, data) {
+				renderMonthBody = function ($parent) {
 					var firstDateMonth = new Date(renderDate.getFullYear(), renderDate.getMonth(), 1);
 					var lastDateMonth = new Date(renderDate.getFullYear(), renderDate.getMonth() + 1, 0);
 					
 					var calendarStartDate = new Date(firstDateMonth);
 					calendarStartDate.setDate(calendarStartDate.getDate() - (firstDateMonth.getDay() % 7));
-					
 					
 					var calendarEndDate = new Date(lastDateMonth);
 					calendarEndDate.setDate(calendarEndDate.getDate() + (6 - lastDateMonth.getDay()));
@@ -304,13 +309,18 @@
 						var $trCalendar = $(document.createElement('div'));
 						$trCalendar.addClass('sc-table-row');
 						
+						var $divEventWrapper = $(document.createElement('div'));
+						$divEventWrapper.addClass('sc-event-row-wrapper');
+						var $tblEvent = $(document.createElement('table'));
+						var $tbdEvent = $(document.createElement('tbody'));
+						var $trEvent = $(document.createElement('tr'));
+						
 						for (var i = 0; i < 7; i++) {
 							var $thCalendar = $(document.createElement('div'));
 							$thCalendar.addClass('sc-table-row-th');
 							var $aCalendar = $(document.createElement('a'));
 							$thCalendar.addClass('sc-day');
 							$thCalendar.addClass('sc-' + shortDays[currentDate.getDay()]);
-							$thCalendar.attr('data-goto', currentDate.toDateString());
 							
 							if (currentDate.getMonth() != renderDate.getMonth()) {
 								$thCalendar.addClass('sc-other-month');
@@ -321,12 +331,44 @@
 							$thCalendar.append($aCalendar);
 							$trCalendar.append($thCalendar);
 							currentDate.setDate(currentDate.getDate() + 1);
+							
+							var $tdEvent = $(document.createElement('td'));
+							$tdEvent.attr('data-goto', currentDate.toDateString());
+							$trEvent.append($tdEvent);
 						}
 						
 						$tblCalendar.append($trCalendar);
 						$divWrapper.append($tblCalendar);
 						$divRow.append($divWrapper);
+						
+						$tbdEvent.append($trEvent);
+						$tblEvent.append($tbdEvent);
+						$divEventWrapper.append($tblEvent);
+						$divRow.append($divEventWrapper);
+						
 						$parent.append($divRow);
+					}
+				};
+				
+				renderMonthEvent = function ($parent, data) {
+					var firstDateMonth = new Date(renderDate.getFullYear(), renderDate.getMonth(), 1);
+					var lastDateMonth = new Date(renderDate.getFullYear(), renderDate.getMonth() + 1, 0);
+					
+					var calendarStartDate = new Date(firstDateMonth);
+					calendarStartDate.setDate(calendarStartDate.getDate() - (firstDateMonth.getDay() % 7));
+					
+					var calendarEndDate = new Date(lastDateMonth);
+					calendarEndDate.setDate(calendarEndDate.getDate() + (6 - lastDateMonth.getDay()));
+					
+					var thisMonthEvents = data.filter(function (el) {
+						var start = new Date(el.start);
+						var end = new Date(el.end);
+						
+						return (start >= calendarStartDate && start <= calendarEndDate) || (end >= calendarStartDate && end <= calendarEndDate);
+					});
+					
+					for (var i = 0; i < thisMonthEvents.length; i++) {
+						setMonthEvent(thisMonthEvents[i], $parent);
 					}
 				};
 				
@@ -611,6 +653,44 @@
 					if (configs.mode != 'day') {
 						configs.mode = 'day';
 						refreshView();
+					}
+				};
+				
+				setMonthEvent = function (event, $parent) {
+					var start = new Date(event.start),
+						end = new Date(event.end),
+						title = event.title,
+						$parent = $parent || $('.sc .sc-month-body'),
+						$divEvent = $(document.createElement('div'));
+						$divEvent.html(start.toLocaleTimeString() + title);
+					
+					var $startTd = $parent.find('td[data-goto="' + start.toDateString() + '"]');
+					if($startTd.html() == '') {
+						$startTd.append($divEvent);
+					}
+					else {
+						var colIndex = $parent.find('td[data-goto="' + start.toDateString() + '"]')[0].cellIndex + 1;
+						var $parentTable = $startTd.closest('table');
+						var foundEmpty = false;
+						
+						$parentTable.find('td:nth-child(' + colIndex + ')').each(function() {
+							if ($(this).html() == '') {
+								$(this).append($divEvent);
+								foundEmpty = true;
+								return false;
+							}
+						});
+						
+						if (!foundEmpty) {
+							var newRow = $parentTable[0].insertRow($parentTable[0].rows.length);
+							// insert table cells to the new row
+							for (i = 0; i < $parentTable[0].rows[0].cells.length; i++) {
+								var cell = newRow.insertCell(i);
+								if ((colIndex - 1) == i) {
+									$(cell).append($divEvent);
+								}
+							}
+						}
 					}
 				};
 				
