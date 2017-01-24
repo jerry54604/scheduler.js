@@ -330,11 +330,12 @@
 							$aCalendar.attr('data-goto', currentDate.toDateString());
 							$thCalendar.append($aCalendar);
 							$trCalendar.append($thCalendar);
-							currentDate.setDate(currentDate.getDate() + 1);
 							
 							var $tdEvent = $(document.createElement('td'));
 							$tdEvent.attr('data-goto', currentDate.toDateString());
 							$trEvent.append($tdEvent);
+							
+							currentDate.setDate(currentDate.getDate() + 1);
 						}
 						
 						$tblCalendar.append($trCalendar);
