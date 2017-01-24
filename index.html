@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<style>
 			html, body { margin: 0; padding: 0; }
 		</style>
@@ -9,7 +10,7 @@
 				font-family: Sans-Serif;
 			}
 		
-			.sc-toolbar {
+			.sc .sc-toolbar {
 				display: flex;
 				justify-content: space-between;
 			}
@@ -33,19 +34,20 @@
 			
 			.sc .sc-table-row-th {
 				text-align: center;
+				vertical-align: middle;
 			}
 			
 			.sc .sc-table-row-th, .sc .sc-table-row-td {
 				display: table-cell;
 			}
 			
-			.sc-week-row {
+			.sc .sc-week-row {
 				position: relative;
 				overflow: hidden;
-				min-height: 30px;
+				height: 30px;
 			}
 			
-			.sc-week-row-wrapper {
+			.sc .sc-week-row-wrapper {
 				position: absolute;
 				top: 0;
 				right: 0;
@@ -53,16 +55,29 @@
 				left: 0;
 			}
 			
-			.sc-week-row-wrapper > table {
+			.sc .sc-week-row-wrapper > table {
 				height: 100%;
 			}
 			
-			.sc-day > a {
+			.sc .sc-day > a {
 				padding: 2px;
 			}
 			
-			.sc-other-month {
+			.sc .sc-other-month {
 				color: #aaa;
+			}
+			
+			.sc .sc-axis {
+				width: 60px;
+				padding: 2px;
+			}
+			
+			.sc .sc-time-row {
+				height: 20px;
+			}
+			
+			.sc .sc-time-second {
+				border-top-style: dotted;
 			}
 			
 			@media (min-width: 600px) {
@@ -74,11 +89,15 @@
 					border-color: #ddd;
 				}
 				
-				.sc-week-row {
+				.sc .sc-week-row {
 					height: 110px;
 				}
 				
-				.sc-day {
+				.sc .sc-table-row-th {
+					vertical-align: baseline;
+				}
+				
+				.sc .sc-day {
 					text-align: right !important;
 				}
 			}
@@ -105,12 +124,19 @@
 				$divToolbar = $(document.createElement('div'));
 				
 				init = function () {
+					setConfig();
 					renderDate = new Date(configs.date.getFullYear(), configs.date.getMonth(), 1);
 					renderToolBar();
 					$currentView.addClass('sc-view');
 					renderBody();
 					$element.append($currentView);
 					$element.addClass('sc');
+				};
+				
+				setConfig = function () {
+					for (var key in userConfigs) {
+						configs[key] = userConfigs[key];
+					}
 				};
 				
 				refreshView = function (data) {
@@ -345,6 +371,7 @@
 					
 					var $thHeader = $(document.createElement('div'));
 					$thHeader.addClass('sc-table-row-th');
+					$thHeader.addClass('sc-axis');
 					$trHeader.append($thHeader);
 					
 					var firstDayWeek = new Date(renderDate);
@@ -368,9 +395,11 @@
 					$tblAllDay.addClass('sc-table');
 					var $trAllDay = $(document.createElement('div'));
 					$trAllDay.addClass('sc-table-row');
+					$trAllDay.addClass('sc-all-day');
 					
 					var $tdAllDay = $(document.createElement('div'));
 					$tdAllDay.addClass('sc-table-row-td');
+					$tdAllDay.addClass('sc-axis');
 					$tdAllDay.html('<span>all day</span>');
 					$trAllDay.append($tdAllDay);
 					
@@ -391,12 +420,17 @@
 					for (var i = 0; i < 48; i++) {
 						var $trTimeBody = $(document.createElement('div'));
 						$trTimeBody.addClass('sc-table-row');
+						$trTimeBody.addClass('sc-time-row');
 						var $tdTimeBody = $(document.createElement('div'));
 						$tdTimeBody.addClass('sc-table-row-td');
+						$tdTimeBody.addClass('sc-axis');
 						if (i % 2 == 0) {
 							var time = ((i % 24) / 2);
 							time = ((time == 0) ? 12 : time);
 							$tdTimeBody.html('<span>' + time + (i < 24 ? 'am' : 'pm') + '</span>');
+						}
+						else {
+							$tdTimeBody.addClass('sc-time-second');
 						}
 						$trTimeBody.append($tdTimeBody);
 						
@@ -404,6 +438,10 @@
 							$tdTimeBody = $(document.createElement('div'));
 							$tdTimeBody.addClass('sc-table-row-td');
 							$trTimeBody.append($tdTimeBody);
+							
+							if (i % 2 != 0) {
+								$tdTimeBody.addClass('sc-time-second');
+							}
 						}
 						$tblTimeBody.append($trTimeBody);
 					}
@@ -450,6 +488,7 @@
 					$trHeader.addClass('sc-table-row');
 					
 					var $thHeader = $(document.createElement('div'));
+					$thHeader.addClass('sc-axis');
 					$thHeader.addClass('sc-table-row-th');
 					$trHeader.append($thHeader);
 					
@@ -471,9 +510,11 @@
 					$tblAllDay.addClass('sc-table');
 					var $trAllDay = $(document.createElement('div'));
 					$trAllDay.addClass('sc-table-row');
+					$trAllDay.addClass('sc-all-day');
 					
 					var $tdAllDay = $(document.createElement('div'));
 					$tdAllDay.addClass('sc-table-row-td');
+					$tdAllDay.addClass('sc-axis');
 					$tdAllDay.html('<span>all day</span>');
 					$trAllDay.append($tdAllDay);
 					
@@ -492,17 +533,25 @@
 					for (var i = 0; i < 48; i++) {
 						var $trTimeBody = $(document.createElement('div'));
 						$trTimeBody.addClass('sc-table-row');
+						$trTimeBody.addClass('sc-time-row');
 						var $tdTimeBody = $(document.createElement('div'));
 						$tdTimeBody.addClass('sc-table-row-td');
+						$tdTimeBody.addClass('sc-axis');
 						if (i % 2 == 0) {
 							var time = ((i % 24) / 2);
 							time = ((time == 0) ? 12 : time);
 							$tdTimeBody.html('<span>' + time + (i < 24 ? 'am' : 'pm') + '</span>');
 						}
+						else {
+							$tdTimeBody.addClass('sc-time-second');
+						}
 						$trTimeBody.append($tdTimeBody);
 						
 						$tdTimeBody = $(document.createElement('div'));
 						$tdTimeBody.addClass('sc-table-row-td');
+						if (i % 2 != 0) {
+							$tdTimeBody.addClass('sc-time-second');
+						}
 						$trTimeBody.append($tdTimeBody);
 						
 						$tblTimeBody.append($trTimeBody);
@@ -600,7 +649,30 @@
 			};
 		</script>
 		<script>
-			$('.divcalendar').scheduler({ test: true });
+			var data = [
+				{
+					title: 'Testing 1',
+					start: 'Tue, 24 Jan 2017 03:00:00 GMT',
+					end: 'Tue, 24 Jan 2017 04:00:00 GMT'
+				},
+				{
+					title: 'Testing 2',
+					start: 'Wed, 25 Jan 2017 03:00:00 GMT',
+					end: 'Wed, 25 Jan 2017 04:00:00 GMT'
+				},
+				{
+					title: 'Testing 2',
+					start: 'Wed, 25 Jan 2017 03:00:00 GMT',
+					end: 'Wed, 25 Jan 2017 04:00:00 GMT'
+				},
+				{
+					title: 'Testing 2',
+					start: 'Wed, 1 Feb 2017 03:00:00 GMT',
+					end: 'Wed, 1 Feb 2017 04:00:00 GMT'
+				}
+			];
+			
+			$('.divcalendar').scheduler({ test: true, data: data });
 		</script>
 	</body>
 </html>
