@@ -80,6 +80,32 @@
 				border-top-style: dotted;
 			}
 			
+			@media (max-width: 599px) {
+				.sc .sc-event-row-wrapper td {
+					position: relative;
+				}
+				
+				.sc .sc-event-item {
+					height: 5px;
+					width: 5px;
+					left: 0;
+					right: 0;
+					position: absolute;
+					margin-left: auto;
+					margin-right: auto;
+				}
+				
+				.sc .sc-event-first-item {
+					border: 1px solid #65b765;
+					background: green;
+					border-radius: 5px;
+				}
+				
+				.sc .sc-event-item span {
+					display: none;
+				}
+			}
+			
 			@media (min-width: 600px) {
 				.sc .sc-table-row-th, .sc .sc-table-row-td {
 					border-style: solid;
@@ -662,10 +688,12 @@
 						end = new Date(event.end),
 						title = event.title,
 						$divEvent = $(document.createElement('div'));
-						$divEvent.html(start.toLocaleTimeString() + title);
+						$divEvent.addClass('sc-event-item');
+						$divEvent.html('<span>' + start.toLocaleTimeString() + '</span><span>' + title + '</span>');
 					
 					var $startTd = $parent.find('td[data-goto="' + start.toDateString() + '"]');
 					if($startTd.html() == '') {
+						$divEvent.addClass('sc-event-first-item');
 						$startTd.append($divEvent);
 					}
 					else {
