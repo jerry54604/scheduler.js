@@ -99,10 +99,20 @@
 					border: 1px solid #65b765;
 					background: #65b765;
 					border-radius: 5px;
+					top: 0;
 				}
 				
-				.sc .sc-event-item span {
+				.sc .sc-event-item span, .sc .sc-event-items span {
 					display: none;
+				}
+				
+				.sc .sc-event-items {
+					height: 5px;
+					border: 1px solid #65b765;
+					background: #65b765;
+					position: absolute;
+					top: 0;
+					width: 100%;
 				}
 			}
 			
@@ -130,6 +140,10 @@
 				.sc .sc-event-row-wrapper {
 					position: absolute;
 					top: 21px;
+				}
+				
+				.sc .sc-event-item, .sc .sc-event-items {
+					background: #EEE;
 				}
 			}
 		</style>
@@ -690,32 +704,118 @@
 						$divEvent = $(document.createElement('div'));
 						$divEvent.addClass('sc-event-item');
 						$divEvent.html('<span>' + start.toLocaleTimeString() + '</span><span>' + title + '</span>');
-					
-					var $startTd = $parent.find('td[data-goto="' + start.toDateString() + '"]');
-					if($startTd.html() == '') {
-						$divEvent.addClass('sc-event-first-item');
-						$startTd.append($divEvent);
+						
+					if (start.toDateString() == end.toDateString()) {
+						var $startTd = $parent.find('td[data-goto="' + start.toDateString() + '"]');
+						if($startTd.html() == '') {
+							$divEvent.addClass('sc-event-first-item');
+							$startTd.append($divEvent);
+						}
+						else {
+							var colIndex = $startTd[0].cellIndex;
+							var $parentTable = $startTd.closest('table');
+							var foundEmpty = false;
+							
+							$parentTable.find('td:nth-child(' + (colIndex + 1) + ')').each(function() {
+								if ($(this).html() == '') {
+									$(this).append($divEvent);
+									foundEmpty = true;
+									return false;
+								}
+							});
+							
+							if (!foundEmpty) {
+								var newRow = $parentTable[0].insertRow($parentTable[0].rows.length);
+								// insert table cells to the new row
+								for (i = 0; i < 7; i++) {
+									var cell = newRow.insertCell(i);
+									if ((colIndex) == i) {
+										$(cell).append($divEvent);
+									}
+								}
+							}
+						}
 					}
 					else {
-						var colIndex = $parent.find('td[data-goto="' + start.toDateString() + '"]')[0].cellIndex + 1;
-						var $parentTable = $startTd.closest('table');
-						var foundEmpty = false;
+						var days = daysBetween(start.toDateString(), end.toDateString()) + 1; // Plus 1 for counting days
+						var trueStart = new Date(start);
+						var $startTd = $parent.find('td[data-goto="' + start.toDateString() + '"]');
+						var isLastMonth = false;
 						
-						$parentTable.find('td:nth-child(' + colIndex + ')').each(function() {
-							if ($(this).html() == '') {
-								$(this).append($divEvent);
-								foundEmpty = true;
-								return false;
+						if ($startTd.length == 0) {
+							isLastMonth = true;
+							var firstDateMonth = new Date(renderDate.getFullYear(), renderDate.getMonth(), 1);
+							var calendarStartDate = new Date(firstDateMonth);
+							calendarStartDate.setDate(calendarStartDate.getDate() - (firstDateMonth.getDay() % 7));
+							
+							trueStart = calendarStartDate;
+						}
+						
+						while (days > 0) {
+							var createNewRow = false;
+							$startTd = $parent.find('td[data-goto="' + trueStart.toDateString() + '"]');
+							var $parentTable = $startTd.closest('table');
+							var colIndex = $startTd[0].cellIndex;
+							
+							var row = $parentTable[0].rows[$startTd[0].closest('tr').rowIndex];
+							
+							for (var i = colIndex, col; col = row.cells[i]; i++) {
+								if ($(col).html() != '') {
+									createNewRow = true;
+									break;
+								}
+								else if (colIndex > days) {
+									break;
+								}
 							}
-						});
-						
-						if (!foundEmpty) {
-							var newRow = $parentTable[0].insertRow($parentTable[0].rows.length);
-							// insert table cells to the new row
-							for (i = 0; i < $parentTable[0].rows[0].cells.length; i++) {
-								var cell = newRow.insertCell(i);
-								if ((colIndex - 1) == i) {
-									$(cell).append($divEvent);
+							
+							var colspan = 0;
+							
+							if (createNewRow) {
+								var newRow = $parentTable[0].insertRow($parentTable[0].rows.length);
+								
+								
+								for (i = 0; i < 7; i++) {
+									var cell = newRow.insertCell(i);
+									if ((colIndex) == i && days > 0) {
+										colIndex++;
+										colspan++;
+										days--;
+										trueStart.setDate(trueStart.getDate() + 1);
+										
+										if (days == 0 || colIndex == 7) {
+											var $divEvents = $(document.createElement('div'));
+											$divEvents.addClass('sc-event-items');
+											$divEvents.html('<span>' + title + '</span>');
+											$(cell).attr('colspan', colspan);
+											$(cell).append($divEvents);
+										}
+										else {
+											$(cell).hide();
+										}
+									}
+								}
+							}
+							else {
+								for (i = colIndex, cell; cell = $parentTable[0].rows[0].cells[i]; i++) {
+									if ((colIndex) == i && days > 0) {
+										colIndex++;
+										colspan++;
+										days--;
+										trueStart.setDate(trueStart.getDate() + 1);
+										
+										if (days == 0 || colIndex == 7) {
+											var $divEvents = $(document.createElement('div'));
+											$divEvents.addClass('sc-event-items');
+											$divEvents.html('<span>' + title + '</span>');
+											$(cell).attr('colspan', colspan);
+											$(cell).append($divEvents);
+											break;
+										}
+										else {
+											$(cell).hide();
+										}
+									}
 								}
 							}
 						}
@@ -730,13 +830,25 @@
 					return (configs.shortMonth ? months[month] : months[month]);
 				};
 				
+				treatAsUTC = function (date) {
+					var result = new Date(date);
+					result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
+					return result;
+				}
+
+				daysBetween = function (startDate, endDate) {
+					var millisecondsPerDay = 24 * 60 * 60 * 1000;
+					return (treatAsUTC(endDate) - treatAsUTC(startDate)) / millisecondsPerDay;
+				}
+				
 				init();
 				
 				return {
 					element: element,
 					refreshView: refreshView,
 					prevView: prevView,
-					nextView: nextView
+					nextView: nextView,
+					setMonthEvent: setMonthEvent
 				};
 			});
 			
@@ -758,6 +870,16 @@
 		</script>
 		<script>
 			var data = [
+				{
+					title: 'Testing Vac',
+					start: 'Tue, 12 Jan 2017 03:00:00 GMT',
+					end: 'Tue, 17 Jan 2017 04:00:00 GMT'
+				},
+				{
+					title: 'Testing huh',
+					start: 'Tue, 18 Jan 2017 03:00:00 GMT',
+					end: 'Tue, 18 Jan 2017 04:00:00 GMT'
+				},
 				{
 					title: 'Testing 1',
 					start: 'Tue, 24 Jan 2017 03:00:00 GMT',
