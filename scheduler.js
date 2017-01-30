@@ -130,6 +130,7 @@ var Scheduler = (function (element, userConfigs) {
     var $tblCalendar = $(document.createElement('table'));
     var $thdCalendar = $(document.createElement('thead'));
     $thdCalendar.addClass('sc-month-head');
+    $thdCalendar.addClass('sc-header');
     var $trCalendar = $(document.createElement('tr'));
     var $tdCalendar = $(document.createElement('td'));
 
@@ -266,6 +267,7 @@ var Scheduler = (function (element, userConfigs) {
     var $tblCalendar = $(document.createElement('table'));
     var $thdCalendar = $(document.createElement('thead'));
     $thdCalendar.addClass('sc-week-head');
+    $thdCalendar.addClass('sc-header');
     var $trCalendar = $(document.createElement('tr'));
     var $tdCalendar = $(document.createElement('td'));
 
@@ -385,6 +387,7 @@ var Scheduler = (function (element, userConfigs) {
     var $tblCalendar = $(document.createElement('table'));
     var $thdCalendar = $(document.createElement('thead'));
     $thdCalendar.addClass('sc-day-head');
+    $thdCalendar.addClass('sc-header');
     var $trCalendar = $(document.createElement('tr'));
     var $tdCalendar = $(document.createElement('td'));
 
