@@ -290,6 +290,7 @@ var Scheduler = (function (element, userConfigs) {
     $divWrapper.append($tblCalendar);
 
     $currentView.append($divWrapper);
+    renderWeekEvent($tdCalendar, data);
   };
 
   renderWeekHeader = function ($parent) {
@@ -311,6 +312,7 @@ var Scheduler = (function (element, userConfigs) {
     for (var i = 0; i < 7; i++) {
       $thHeader = $(document.createElement('div'));
       $thHeader.addClass('sc-table-row-th');
+	  $thHeader.attr('data-date', firstDayWeek.toDateString());
       $thHeader.html('<span>' + getDayString(i) + ' ' + (firstDayWeek.getMonth() + 1) + '/' + firstDayWeek.getDate() + '</span>');
       $trHeader.append($thHeader);
       firstDayWeek.setDate(firstDayWeek.getDate() + 1);
@@ -322,6 +324,7 @@ var Scheduler = (function (element, userConfigs) {
 
   renderWeekBody = function ($parent, data) {
     var $divAllDay = $(document.createElement('div'));
+    $divAllDay.addClass('sc-all-day-wrapper');
     var $tblAllDay = $(document.createElement('div'));
     $tblAllDay.addClass('sc-table');
     var $trAllDay = $(document.createElement('div'));
@@ -333,37 +336,79 @@ var Scheduler = (function (element, userConfigs) {
     $tdAllDay.addClass('sc-axis');
     $tdAllDay.html('<span>all day</span>');
     $trAllDay.append($tdAllDay);
+	
+    var $tblAllDayEvent = $(document.createElement('div'));
+	$tblAllDayEvent.addClass('sc-table');
+	$tblAllDayEvent.addClass('sc-all-day-event');
+	var $trAllDayEvent = $(document.createElement('div'));
+    $trAllDayEvent.addClass('sc-table-row');
+	var $tdAllDayEvent = $(document.createElement('div'));
+    $tdAllDayEvent.addClass('sc-table-row-td');
+    $tdAllDayEvent.addClass('sc-axis');
+	$trAllDayEvent.append($tdAllDayEvent);
+	
+	var $tblTimeEvent = $(document.createElement('div'));
+	$tblTimeEvent.addClass('sc-table');
+	$tblTimeEvent.addClass('sc-time-event');
+    var $trTimeEvent = $(document.createElement('div'));
+    $trTimeEvent.addClass('sc-table-row');
+    var $tdTimeEvent = $(document.createElement('div'));
+    $tdTimeEvent.addClass('sc-table-row-td');
+    $tdTimeEvent.addClass('sc-axis');
+	$trTimeEvent.append($tdTimeEvent);
 
     for (var i = 0; i < 7; i++) {
       $tdAllDay = $(document.createElement('div'));
       $tdAllDay.addClass('sc-table-row-td');
       $trAllDay.append($tdAllDay);
+	  
+      $tdAllDayEvent = $(document.createElement('div'));
+      $tdAllDayEvent.addClass('sc-table-row-td');
+      $trAllDayEvent.append($tdAllDayEvent);
+	  
+      $tdTimeEvent = $(document.createElement('div'));
+      $tdTimeEvent.addClass('sc-table-row-td');
+      $tdTimeEvent.addClass('sc-time-event-col');
+      $trTimeEvent.append($tdTimeEvent);
     }
 
     $tblAllDay.append($trAllDay);
     $divAllDay.append($tblAllDay);
+	
+	$tblAllDayEvent.append($trAllDayEvent);
+    $divAllDay.append($tblAllDayEvent);
+	
     $parent.append($divAllDay);
 
     var $divTimeBody = $(document.createElement('div'));
+    $divTimeBody.addClass('sc-time-row-wrapper');
     var $tblTimeBody = $(document.createElement('div'));
     $tblTimeBody.addClass('sc-table');
 
     for (var i = 0; i < 48; i++) {
+	  var rowTime = (i < 20) ? ('0' + Math.floor(i / 2)) + ':' : Math.floor(i / 2) + ':';
+	  
       var $trTimeBody = $(document.createElement('div'));
       $trTimeBody.addClass('sc-table-row');
       $trTimeBody.addClass('sc-time-row');
       var $tdTimeBody = $(document.createElement('div'));
       $tdTimeBody.addClass('sc-table-row-td');
       $tdTimeBody.addClass('sc-axis');
+	  
       if (i % 2 == 0) {
         var time = ((i % 24) / 2);
         time = ((time == 0) ? 12 : time);
         $tdTimeBody.html('<span>' + time + (i < 24 ? 'am' : 'pm') + '</span>');
+		
+		rowTime += '00';
       }
       else {
         $tdTimeBody.addClass('sc-time-second');
+		
+		rowTime += '30';
       }
       $trTimeBody.append($tdTimeBody);
+	  $trTimeBody.attr('data-time', rowTime);
 
       for (var j = 0; j < 7; j++) {
         $tdTimeBody = $(document.createElement('div'));
@@ -377,7 +422,46 @@ var Scheduler = (function (element, userConfigs) {
       $tblTimeBody.append($trTimeBody);
     }
     $divTimeBody.append($tblTimeBody);
+
+	$tblTimeEvent.append($trTimeEvent);
+    $divTimeBody.append($tblTimeEvent);
+
     $parent.append($divTimeBody);
+  };
+
+  renderWeekEvent = function ($parent, data) {
+    var firstDayWeek = new Date(renderDate);
+    firstDayWeek.setDate(firstDayWeek.getDate() - renderDate.getDay());
+	
+	var lastDayWeek = new Date(firstDayWeek);
+	lastDayWeek.setDate(lastDayWeek.getDate() + 7);
+
+    var thisWeekEvents = data.filter(function (el) {
+      var start = new Date(el.start);
+      var end = new Date(el.end);
+
+      return (start >= firstDayWeek && start <= lastDayWeek) || (end >= firstDayWeek && end <= lastDayWeek);
+    });
+	
+	/* var curDay = new Date(firstDayWeek);
+	while (curDay < lastDayWeek) {
+	  var curDayEvents = data.filter(function (el) {
+		var start = new Date(el.start);
+        var end = new Date(el.end);
+		
+		return (start >= curDay && end <= curDay) || curDay.toDateString() == start.toDateString() || curDay.toDateString() == end.toDateString();
+	  });
+
+      for (var i = 0; i < curDayEvents.length; i++) {
+        setWeekEvent(curDayEvents[i], $parent);
+      }
+	  
+	  curDay.setDate(curDay.getDate() + 1);
+	} */
+	
+    for (var i = 0; i < thisWeekEvents.length; i++) {
+      setWeekEvent(thisWeekEvents[i], $parent);
+    }
   };
 
   renderDay = function (data) {
@@ -670,6 +754,49 @@ var Scheduler = (function (element, userConfigs) {
       }
     }
   };
+  
+  setWeekEvent = function (event, $parent = $('.sc .sc-week-body')) {
+	var start = new Date(event.start),
+      end = new Date(event.end),
+      title = event.title,
+      $divEvent = $(document.createElement('div'));
+      $divEvent.addClass('sc-time-event-item');
+      $divEvent.html('<span>' + start.toLocaleTimeString() + '</span><span>' + title + '</span>');
+	
+	if (start.toDateString() == end.toDateString()) {
+	  var startPosition = start.getHours() * 40;
+	  startPosition += Math.round((start.getMinutes() / 60) * 40);
+	  var eventHeight = Math.round((Math.abs(start - end) / 36e5) * 40);
+	  
+	  $divEvent.css({ top: startPosition + 'px', height: eventHeight + 'px' });
+	  
+	  var colIndex = $('.sc .sc-week-head').find('div[data-date="' + start.toDateString() + '"]').index();
+	  
+	  var $column = $parent.find('.sc-time-event > .sc-table-row').children().eq(colIndex);
+	  
+	  $column.append($divEvent);
+	}
+	
+	
+  }
+  
+  addEvents = function (events) {
+    if (configs.mode == 'month') {
+	  for (var i = 0, event; event = events; i++) {
+        setMonthEvent(event);
+	  }
+    }
+    else if (configs.mode == 'week') {
+	  for (var i = 0, event; event = events; i++) {
+        setWeekEvent(event);
+	  }
+    }
+    else if (configs.mode == 'day') {
+	  for (var i = 0, event; event = events; i++) {
+        setWeekEvent(event);
+	  }
+    }
+  }
 
   getDayString = function (day) {
     return (configs.shortDay ? shortDays[day] : days[day]);
@@ -683,12 +810,12 @@ var Scheduler = (function (element, userConfigs) {
     var result = new Date(date);
     result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
     return result;
-  }
+  };
 
   daysBetween = function (startDate, endDate) {
     var millisecondsPerDay = 24 * 60 * 60 * 1000;
     return (treatAsUTC(endDate) - treatAsUTC(startDate)) / millisecondsPerDay;
-  }
+  };
 
   init();
 
@@ -697,7 +824,7 @@ var Scheduler = (function (element, userConfigs) {
     refreshView: refreshView,
     prevView: prevView,
     nextView: nextView,
-    setMonthEvent: setMonthEvent
+    addEvents: addEvents
   };
 });
 
