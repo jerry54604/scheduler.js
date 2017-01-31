@@ -72,6 +72,15 @@
 				padding: 2px;
 			}
 			
+			.sc .sc-time-row-wrapper, .sc .sc-all-day-wrapper {
+				position: relative;
+			}
+			
+			.sc .sc-all-day-event, .sc .sc-time-event {
+				position: absolute;
+				top: 0;
+			}
+			
 			.sc .sc-time-row {
 				height: 20px;
 			}
@@ -84,12 +93,23 @@
 				border-width: 1px;
 			}
 			
+			.sc .sc-all-day > .sc-table-row-td {
+				border-bottom-width: 1px;
+				border-bottom-style: solid;
+			}
+			
 			.sc .sc-time-row:last-child > .sc-table-row-td {
 				border-bottom-style: solid;
 			}
 			
 			.sc .sc-time-second {
 				border-top-style: dotted !important;
+			}
+			
+			.sc .sc-time-event-item {
+				position: absolute;
+				border: 1px solid #00c6d0;
+				background-color: #f0feff;
 			}
 			
 			@media (max-width: 699px) {
@@ -191,8 +211,8 @@
 				},
 				{
 					title: 'Testing huh',
-					start: 'Tue, 18 Jan 2017 03:00:00 GMT',
-					end: 'Tue, 18 Jan 2017 04:00:00 GMT'
+					start: 'Tue, 17 Jan 2017 03:00:00 GMT',
+					end: 'Tue, 17 Jan 2017 04:00:00 GMT'
 				},
 				{
 					title: 'Testing 1',
