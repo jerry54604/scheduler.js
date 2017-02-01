@@ -139,6 +139,10 @@
 		top: 0;
 		width: 100%;
 	}
+	
+	.sc .sc-axis span {
+		font-size: 13px
+	}
 }
 
 @media (min-width: 700px) {
