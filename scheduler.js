@@ -252,7 +252,8 @@ var Scheduler = (function (element, userConfigs) {
       var start = new Date(el.start);
       var end = new Date(el.end);
 
-      return (start >= calendarStartDate && start <= calendarEndDate) || (end >= calendarStartDate && end <= calendarEndDate);
+	  // Check if start or end day is in between calendar dates, else check if start and end day is overlapping calendar dates
+      return (start >= calendarStartDate && start <= calendarEndDate) || (end >= calendarStartDate && end <= calendarEndDate) || (start <= calendarStartDate && end >= calendarEndDate);
     });
 
     for (var i = 0; i < thisMonthEvents.length; i++) {
@@ -440,7 +441,8 @@ var Scheduler = (function (element, userConfigs) {
       var start = new Date(el.start);
       var end = new Date(el.end);
 
-      return (start >= firstDayWeek && start <= lastDayWeek) || (end >= firstDayWeek && end <= lastDayWeek);
+	  // Check if start or end day is in between week, else check if start and end day is overlapping week
+      return (start >= firstDayWeek && start <= lastDayWeek) || (end >= firstDayWeek && end <= lastDayWeek) || (start <= firstDayWeek && end >= lastDayWeek);
     });
 	
 	/* var curDay = new Date(firstDayWeek);
