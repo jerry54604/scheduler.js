@@ -105,6 +105,14 @@
 	background-color: #f0feff;
 }
 
+.sc .sc-time-event-col {
+	position: relative;
+}
+
+.sc .sc-time-event-item > span {
+	font-size: 10px;
+}
+
 @media (max-width: 699px) {
 	.sc .sc-event-row-wrapper td {
 		position: relative;
