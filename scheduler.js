@@ -461,6 +461,60 @@ var Scheduler = (function (element, userConfigs) {
 	  curDay.setDate(curDay.getDate() + 1);
 	} */
 	
+	thisWeekEvents.sort(function(a, b) {
+	  var aHours = hoursBetween(new Date(a.start), new Date(a.end));
+	  var bHours = hoursBetween(new Date(b.start), new Date(b.end));
+	  
+	  return bHours - aHours;
+	});
+	
+	// Calculating overlapping time
+	for (var i = 0; i < thisWeekEvents.length; i++) {
+	  //var overlapCount = 1;
+	  var overlapStart = [];
+	  var overlapMid = [];
+	  var overlapEnd = [];
+	  for (var j = 0; j < thisWeekEvents.length; j++) {
+		if (i == j) {
+		  overlapStart.push(i);
+		  continue;
+		}
+		else if ((thisWeekEvents[i].start >= thisWeekEvents[j].start && thisWeekEvents[i].start < thisWeekEvents[j].end)) {
+		  overlapStart.push(j);
+	      //overlapCount++;
+		}
+	  }
+	  
+	  for (var j = 0; j < thisWeekEvents.length; j++) {
+		if (i == j) {
+		  overlapEnd.push(i);
+		  continue;
+		}
+		else if ((thisWeekEvents[i].end > thisWeekEvents[j].start && thisWeekEvents[i].end <= thisWeekEvents[j].end)) {
+		  overlapEnd.push(j);
+	      //overlapCount++;
+		}
+	  }
+	  
+	  for (var j = 0; j < thisWeekEvents.length; j++) {
+		if (i == j) {
+		  overlapMid.push(i);
+		  continue;
+		}
+		else if ((thisWeekEvents[i].start <= thisWeekEvents[j].start && thisWeekEvents[i].end >= thisWeekEvents[j].end)) {
+		  overlapMid.push(j);
+	      //overlapCount++;
+		}
+	  }
+	  //thisWeekEvents[i].overlapCount = overlapCount;
+	  thisWeekEvents[i].width = 90 / Math.max(overlapStart.length, overlapMid.length, overlapEnd.length);
+	  var bigOverlap = ((overlapStart.length > overlapMid.length) ? 
+	    ((overlapStart.length > overlapEnd.length) ? overlapStart : overlapEnd) : 
+		((overlapMid.length > overlapEnd.length) ? overlapMid : overlapEnd));
+	  var index = bigOverlap.indexOf(i);
+	  thisWeekEvents[i].left = (index > 0) ? thisWeekEvents[bigOverlap[index - 1]].left + thisWeekEvents[bigOverlap[index - 1]].width : 0;
+	}
+	
     for (var i = 0; i < thisWeekEvents.length; i++) {
       setWeekEvent(thisWeekEvents[i], $parent);
     }
@@ -763,14 +817,14 @@ var Scheduler = (function (element, userConfigs) {
       title = event.title,
       $divEvent = $(document.createElement('div'));
       $divEvent.addClass('sc-time-event-item');
-      $divEvent.html('<span>' + start.toLocaleTimeString() + '</span><span>' + title + '</span>');
+      $divEvent.html('<span>' + start.getHours() + ' - ' + end.getHours() + '</span><span>' + title + '</span>');
 	
 	if (start.toDateString() == end.toDateString()) {
 	  var startPosition = start.getHours() * 40;
 	  startPosition += Math.round((start.getMinutes() / 60) * 40);
-	  var eventHeight = Math.round((Math.abs(start - end) / 36e5) * 40);
+	  var eventHeight = Math.round(hoursBetween(start, end) * 40);
 	  
-	  $divEvent.css({ top: startPosition + 'px', height: eventHeight + 'px' });
+	  $divEvent.css({ top: startPosition + 'px', height: eventHeight + 'px', width: event.width + '%', left: event.left + '%' });
 	  
 	  var colIndex = $('.sc .sc-week-head').find('div[data-date="' + start.toDateString() + '"]').index();
 	  
@@ -818,6 +872,10 @@ var Scheduler = (function (element, userConfigs) {
     var millisecondsPerDay = 24 * 60 * 60 * 1000;
     return (treatAsUTC(endDate) - treatAsUTC(startDate)) / millisecondsPerDay;
   };
+  
+  hoursBetween = function (startDate, endDate) {
+	return (Math.abs(treatAsUTC(startDate) - treatAsUTC(endDate)) / 36e5)
+  }
 
   init();
 
