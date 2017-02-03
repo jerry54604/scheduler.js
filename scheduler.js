@@ -470,7 +470,6 @@ var Scheduler = (function (element, userConfigs) {
 	
 	// Calculating overlapping time
 	for (var i = 0; i < thisWeekEvents.length; i++) {
-	  //var overlapCount = 1;
 	  var overlapStart = [];
 	  var overlapMid = [];
 	  var overlapEnd = [];
@@ -492,7 +491,6 @@ var Scheduler = (function (element, userConfigs) {
 		}
 		else if ((thisWeekEvents[i].end > thisWeekEvents[j].start && thisWeekEvents[i].end <= thisWeekEvents[j].end)) {
 		  overlapEnd.push(j);
-	      //overlapCount++;
 		}
 	  }
 	  
@@ -503,15 +501,29 @@ var Scheduler = (function (element, userConfigs) {
 		}
 		else if ((thisWeekEvents[i].start <= thisWeekEvents[j].start && thisWeekEvents[i].end >= thisWeekEvents[j].end)) {
 		  overlapMid.push(j);
-	      //overlapCount++;
 		}
 	  }
-	  //thisWeekEvents[i].overlapCount = overlapCount;
-	  thisWeekEvents[i].width = 90 / Math.max(overlapStart.length, overlapMid.length, overlapEnd.length);
+	  
+	  var width = 90 / Math.max(overlapStart.length, overlapEnd.length);
+	  
+	  if (thisWeekEvents[i].width == null)
+	    thisWeekEvents[i].width = width;
+	  else if (thisWeekEvents[i].width > width)
+	    thisWeekEvents[i].width = width;
+	/*
 	  var bigOverlap = ((overlapStart.length > overlapMid.length) ? 
 	    ((overlapStart.length > overlapEnd.length) ? overlapStart : overlapEnd) : 
 		((overlapMid.length > overlapEnd.length) ? overlapMid : overlapEnd));
+	*/
+	  var bigOverlap = ((overlapStart.length > overlapEnd.length) ? overlapStart : overlapEnd);
+		
 	  var index = bigOverlap.indexOf(i);
+	  
+	  for (var j = 0; j < bigOverlap.length; j++) {
+		if (thisWeekEvents[bigOverlap[j]].width > width)
+		  thisWeekEvents[bigOverlap[j]].width = width;
+	  }
+	  
 	  thisWeekEvents[i].left = (index > 0) ? thisWeekEvents[bigOverlap[index - 1]].left + thisWeekEvents[bigOverlap[index - 1]].width : 0;
 	}
 	
