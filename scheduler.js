@@ -2,20 +2,21 @@ var Scheduler = (function (element, userConfigs) {
   configs = {
     date: new Date(),
     data: [],
-    shortDay: true,
-    shortMonth: false,
     mode: 'month'
   };
 
   days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   shortDays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  shortMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   renderDate = new Date();
+  shortDisplay: false;
   $currentView = $(document.createElement('div'));
   $divToolbar = $(document.createElement('div'));
 
   init = function () {
     setConfig();
+	shortDisplay = window.matchMedia('(max-width: 699px)').matches;
     renderDate = new Date(configs.date.getFullYear(), configs.date.getMonth(), 1);
     renderToolBar();
     $currentView.addClass('sc-view');
@@ -166,7 +167,7 @@ var Scheduler = (function (element, userConfigs) {
     for (var i = 0; i < 7; i++) {
       var $thHeader = $(document.createElement('div'));
       $thHeader.addClass('sc-table-row-th');
-      $thHeader.html('<span>' + getDayString(i) + '</span>');
+      $thHeader.html('<span class="sc-header-day-text">' + getDayString(i) + '</span>');
       $trHeader.append($thHeader);
     }
     $tblHeader.append($trHeader);
@@ -314,7 +315,7 @@ var Scheduler = (function (element, userConfigs) {
       $thHeader = $(document.createElement('div'));
       $thHeader.addClass('sc-table-row-th');
 	  $thHeader.attr('data-date', firstDayWeek.toDateString());
-      $thHeader.html('<span>' + getDayString(i) + ' ' + (firstDayWeek.getMonth() + 1) + '/' + firstDayWeek.getDate() + '</span>');
+      $thHeader.html('<span class="sc-header-day-text">' + getDayString(i) + '</span><span> ' + (firstDayWeek.getMonth() + 1) + '/' + firstDayWeek.getDate() + '</span>');
       $trHeader.append($thHeader);
       firstDayWeek.setDate(firstDayWeek.getDate() + 1);
     }
@@ -578,7 +579,7 @@ var Scheduler = (function (element, userConfigs) {
 
     $thHeader = $(document.createElement('div'));
     $thHeader.addClass('sc-table-row-th');
-    $thHeader.html('<span>' + getDayString(renderDate.getDay()) + ' '
+    $thHeader.html('<span class="sc-header-day-text">' + getDayString(renderDate.getDay()) + '</span><span> '
       + (renderDate.getMonth() + 1) + '/' + renderDate.getDate() + '</span>');
     $trHeader.append($thHeader);
 
@@ -867,11 +868,11 @@ var Scheduler = (function (element, userConfigs) {
   }
 
   getDayString = function (day) {
-    return (configs.shortDay ? shortDays[day] : days[day]);
+    return (shortDisplay ? shortDays[day] : days[day]);
   };
 
   getMonthString = function (month) {
-    return (configs.shortMonth ? months[month] : months[month]);
+    return (shortDisplay ? shortMonths[month] : months[month]);
   };
 
   treatAsUTC = function (date) {
@@ -886,8 +887,36 @@ var Scheduler = (function (element, userConfigs) {
   };
   
   hoursBetween = function (startDate, endDate) {
-	return (Math.abs(treatAsUTC(startDate) - treatAsUTC(endDate)) / 36e5)
+	return (Math.abs(treatAsUTC(startDate) - treatAsUTC(endDate)) / 36e5);
+  };
+  
+  refreshHeader = function () {
+	$('.sc-header').find('.sc-table-row-th > span.sc-header-day-text').each(function() {
+	  var index;
+	  var headerText = $(this).html();
+	  
+	  if (headerText.length > 3) {
+		index = days.indexOf(headerText);
+	  }
+	  else {
+		index = shortDays.indexOf(headerText);
+	  }
+	  
+      $(this).html(getDayString(index));
+	});
   }
+  
+  var mql = window.matchMedia('(max-width: 699px)');
+  mql.addListener(function(e){
+	if (shortDisplay != e.matches) {
+	  shortDisplay = e.matches;
+	  refreshToolbarTitle();
+	  refreshHeader();
+	}
+	else {
+	  shortDisplay = e.matches;
+	}
+  });
 
   init();
 
@@ -896,6 +925,7 @@ var Scheduler = (function (element, userConfigs) {
     refreshView: refreshView,
     prevView: prevView,
     nextView: nextView,
+	refreshHeader: refreshHeader,
     addEvents: addEvents
   };
 });
