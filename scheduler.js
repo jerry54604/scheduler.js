@@ -16,6 +16,7 @@ var Scheduler = (function (element, userConfigs) {
 
   init = function () {
     setConfig();
+    processData();
     shortDisplay = window.matchMedia('(max-width: 699px)').matches;
     renderDate = new Date(configs.date.getFullYear(), configs.date.getMonth(), 1);
     renderToolBar();
@@ -449,23 +450,12 @@ var Scheduler = (function (element, userConfigs) {
       return (start >= firstDayWeek && start <= lastDayWeek) || (end >= firstDayWeek && end <= lastDayWeek) || (start <= firstDayWeek && end >= lastDayWeek);
     });
     
-    thisWeekEvents.sort(function(a, b) {
-      var aHours = hoursBetween(new Date(a.start), new Date(a.end));
-      var bHours = hoursBetween(new Date(b.start), new Date(b.end));
-      
-      return bHours - aHours;
-    });
-    
     // Calculating overlapping time
     for (var i = 0; i < thisWeekEvents.length; i++) {
       var overlapStart = [];
       var overlapMid = [];
       var overlapEnd = [];
-      thisWeekEvents[i].start = new Date(thisWeekEvents[i].start);
-      thisWeekEvents[i].end = new Date(thisWeekEvents[i].end);
       for (var j = 0; j < thisWeekEvents.length; j++) {
-        thisWeekEvents[j].start = new Date(thisWeekEvents[j].start);
-        thisWeekEvents[j].end = new Date(thisWeekEvents[j].end);
         if (i == j) {
           overlapStart.push(i);
           continue;
@@ -473,7 +463,6 @@ var Scheduler = (function (element, userConfigs) {
         else if ((thisWeekEvents[i].start >= thisWeekEvents[j].start && thisWeekEvents[i].start < thisWeekEvents[j].end) 
             && (thisWeekEvents[i].start.toDateString() == thisWeekEvents[j].start.toDateString() && thisWeekEvents[i].end.toDateString() == thisWeekEvents[j].end.toDateString())) {
           overlapStart.push(j);
-          //overlapCount++;
         }
       }
       
@@ -505,11 +494,7 @@ var Scheduler = (function (element, userConfigs) {
         thisWeekEvents[i].width = width;
       else if (thisWeekEvents[i].width > width)
         thisWeekEvents[i].width = width;
-    /*
-      var bigOverlap = ((overlapStart.length > overlapMid.length) ? 
-        ((overlapStart.length > overlapEnd.length) ? overlapStart : overlapEnd) : 
-        ((overlapMid.length > overlapEnd.length) ? overlapMid : overlapEnd));
-    */
+      
       var bigOverlap = ((overlapStart.length > overlapEnd.length) ? overlapStart : overlapEnd);
         
       var index = bigOverlap.indexOf(i);
@@ -688,23 +673,12 @@ var Scheduler = (function (element, userConfigs) {
       return (start.toDateString() == renderDate.toDateString() || end.toDateString() == renderDate.toDateString()) || (start <= renderDate && end >= renderDate);
     });
     
-    thisDayEvents.sort(function(a, b) {
-      var aHours = hoursBetween(new Date(a.start), new Date(a.end));
-      var bHours = hoursBetween(new Date(b.start), new Date(b.end));
-      
-      return bHours - aHours;
-    });
-    
     // Calculating overlapping time
     for (var i = 0; i < thisDayEvents.length; i++) {
       var overlapStart = [];
       var overlapMid = [];
       var overlapEnd = [];
-      thisDayEvents[i].start = new Date(thisDayEvents[i].start);
-      thisDayEvents[i].end = new Date(thisDayEvents[i].end);
       for (var j = 0; j < thisDayEvents.length; j++) {
-        thisDayEvents[j].start = new Date(thisDayEvents[j].start);
-        thisDayEvents[j].end = new Date(thisDayEvents[j].end);
         if (i == j) {
           overlapStart.push(i);
           continue;
@@ -1073,22 +1047,104 @@ var Scheduler = (function (element, userConfigs) {
     }
   };
   
-  addEvents = function (events) {
-    if (configs.mode == 'month') {
-      for (var i = 0, event; event = events; i++) {
-        setMonthEvent(event);
+  processData = function () {
+    var length = configs.data.length;
+    for (var i = 0; i < length; i++) {
+      configs.data[i].start = new Date(configs.data[i].start);
+      if (configs.data[i].end) {
+        configs.data[i].end = new Date(configs.data[i].end);
       }
+      else {
+        configs.data[i].end = new Date(configs.data[i].start);
+        configs.data[i].end.setHours(configs.data[i].end.getHours() + 24);
+      }
+      
+      configs.data[i].$id = i;
+    }
+    
+    configs.data.sort(function(a, b) {
+      var aHours = hoursBetween(new Date(a.start), new Date(a.end));
+      var bHours = hoursBetween(new Date(b.start), new Date(b.end));
+      
+      return bHours - aHours;
+    });
+  };
+  
+  clearEvents = function () {
+    if (configs.mode == 'month') {
+      $('.sc-event-row-wrapper').each(function() {
+        $(this).find('table tr:not(:first)').remove();
+      });
+      $('.sc-event-row-wrapper table tr td').each(function() {
+        $(this).removeAttr('style');
+        $(this).removeAttr('colspan');
+        $(this).empty();
+      });
     }
     else if (configs.mode == 'week') {
-      for (var i = 0, event; event = events; i++) {
-        setWeekEvent(event);
-      }
+      $('.sc-all-day-event tr:not(:first)').remove();
+      $('.sc-all-day-event tr td').each(function() {
+        $(this).removeAttr('style');
+        $(this).removeAttr('colspan');
+        $(this).empty();
+      });
+      $('.sc-time-event-item').remove();
     }
     else if (configs.mode == 'day') {
-      for (var i = 0, event; event = events; i++) {
-        setDayEvent(event);
-      }
+      $('.sc-all-day-event tr:not(:first)').remove();
+      $('.sc-all-day-event tr td').each(function() {
+        $(this).removeAttr('style');
+        $(this).removeAttr('colspan');
+        $(this).empty();
+      });
+      $('.sc-time-event-item').remove();
     }
+  }
+  
+  refreshEvents = function () {
+    clearEvents();
+    
+    if (configs.mode == 'month') {
+      renderMonthEvent($('.sc-month-body > tr > td'), configs.data);
+    }
+    else if (configs.mode == 'week') {
+      renderWeekEvent($('.sc-week-body > tr > td'), configs.data);
+    }
+    else if (configs.mode == 'day') {
+      renderDayEvent($('.sc-day-body > tr > td'), configs.data);
+    }
+  };
+  
+  addEvents = function (events) {
+    if (events instanceof Array) {
+      var dataLength = configs.data.length, length = events.length;
+      for (var i = 0; i < length; i++) {
+        events[i].$id = dataLength + i;
+      }
+      configs.data = configs.data.concat(events);
+    }
+    else {
+      events.$id = configs.data.length;
+      configs.data.push(events);
+    }
+    
+    refreshEvents();
+  };
+  
+  refreshHeader = function () {
+    $('.sc-header').find('.sc-table-row-th > span.sc-header-day-text').each(function() {
+      var index;
+      var headerText = $(this).html();
+      
+      if (headerText.length > 3) {
+        index = days.indexOf(headerText);
+      }
+      else {
+        index = shortDays.indexOf(headerText);
+      }
+      
+      $(this).html(getDayString(index));
+    });
   };
 
   getDayString = function (day) {
@@ -1116,22 +1172,6 @@ var Scheduler = (function (element, userConfigs) {
   
   formatNumber = function (n) {
 	return (n < 10) ? ('0' + n) : n;
-  };
-  
-  refreshHeader = function () {
-    $('.sc-header').find('.sc-table-row-th > span.sc-header-day-text').each(function() {
-      var index;
-      var headerText = $(this).html();
-      
-      if (headerText.length > 3) {
-        index = days.indexOf(headerText);
-      }
-      else {
-        index = shortDays.indexOf(headerText);
-      }
-      
-      $(this).html(getDayString(index));
-    });
   };
   
   var mql = window.matchMedia('(max-width: 699px)');
@@ -1168,7 +1208,6 @@ $.fn.scheduler = function (configs) {
     scheduler = new Scheduler(this, configs);
     $element.data('scheduler', scheduler);
   }
-
-
+  
   return scheduler;
 };
