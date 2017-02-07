@@ -16,7 +16,7 @@ var Scheduler = (function (element, userConfigs) {
 
   init = function () {
     setConfig();
-	shortDisplay = window.matchMedia('(max-width: 699px)').matches;
+    shortDisplay = window.matchMedia('(max-width: 699px)').matches;
     renderDate = new Date(configs.date.getFullYear(), configs.date.getMonth(), 1);
     renderToolBar();
     $currentView.addClass('sc-view');
@@ -253,8 +253,15 @@ var Scheduler = (function (element, userConfigs) {
       var start = new Date(el.start);
       var end = new Date(el.end);
 
-	  // Check if start or end day is in between calendar dates, else check if start and end day is overlapping calendar dates
+      // Check if start or end day is in between calendar dates, else check if start and end day is overlapping calendar dates
       return (start >= calendarStartDate && start <= calendarEndDate) || (end >= calendarStartDate && end <= calendarEndDate) || (start <= calendarStartDate && end >= calendarEndDate);
+    });
+    
+    thisMonthEvents.sort(function(a, b) {
+      var aHours = hoursBetween(new Date(a.start), new Date(a.end));
+      var bHours = hoursBetween(new Date(b.start), new Date(b.end));
+      
+      return bHours - aHours;
     });
 
     for (var i = 0; i < thisMonthEvents.length; i++) {
@@ -314,7 +321,7 @@ var Scheduler = (function (element, userConfigs) {
     for (var i = 0; i < 7; i++) {
       $thHeader = $(document.createElement('div'));
       $thHeader.addClass('sc-table-row-th');
-	  $thHeader.attr('data-date', firstDayWeek.toDateString());
+      $thHeader.attr('data-date', firstDayWeek.toDateString());
       $thHeader.html('<span class="sc-header-day-text">' + getDayString(i) + '</span><span> ' + (firstDayWeek.getMonth() + 1) + '/' + firstDayWeek.getDate() + '</span>');
       $trHeader.append($thHeader);
       firstDayWeek.setDate(firstDayWeek.getDate() + 1);
@@ -338,32 +345,32 @@ var Scheduler = (function (element, userConfigs) {
     $tdAllDay.addClass('sc-axis');
     $tdAllDay.html('<span>all day</span>');
     $trAllDay.append($tdAllDay);
-	
+    
     var $tblAllDayEvent = $(document.createElement('table'));
-	$tblAllDayEvent.addClass('sc-all-day-event');
-	var $trAllDayEvent = $(document.createElement('tr'));
-	var $tdAllDayEvent = $(document.createElement('td'));
+    $tblAllDayEvent.addClass('sc-all-day-event');
+    var $trAllDayEvent = $(document.createElement('tr'));
+    var $tdAllDayEvent = $(document.createElement('td'));
     $tdAllDayEvent.addClass('sc-axis');
-	$trAllDayEvent.append($tdAllDayEvent);
-	
-	var $tblTimeEvent = $(document.createElement('div'));
-	$tblTimeEvent.addClass('sc-table');
-	$tblTimeEvent.addClass('sc-time-event');
+    $trAllDayEvent.append($tdAllDayEvent);
+    
+    var $tblTimeEvent = $(document.createElement('div'));
+    $tblTimeEvent.addClass('sc-table');
+    $tblTimeEvent.addClass('sc-time-event');
     var $trTimeEvent = $(document.createElement('div'));
     $trTimeEvent.addClass('sc-table-row');
     var $tdTimeEvent = $(document.createElement('div'));
     $tdTimeEvent.addClass('sc-table-row-td');
     $tdTimeEvent.addClass('sc-axis');
-	$trTimeEvent.append($tdTimeEvent);
+    $trTimeEvent.append($tdTimeEvent);
 
     for (var i = 0; i < 7; i++) {
       $tdAllDay = $(document.createElement('div'));
       $tdAllDay.addClass('sc-table-row-td');
       $trAllDay.append($tdAllDay);
-	  
+      
       $tdAllDayEvent = $(document.createElement('td'));
       $trAllDayEvent.append($tdAllDayEvent);
-	  
+      
       $tdTimeEvent = $(document.createElement('div'));
       $tdTimeEvent.addClass('sc-table-row-td');
       $tdTimeEvent.addClass('sc-time-event-col');
@@ -372,10 +379,10 @@ var Scheduler = (function (element, userConfigs) {
 
     $tblAllDay.append($trAllDay);
     $divAllDay.append($tblAllDay);
-	
-	$tblAllDayEvent.append($trAllDayEvent);
+    
+    $tblAllDayEvent.append($trAllDayEvent);
     $divAllDay.append($tblAllDayEvent);
-	
+    
     $parent.append($divAllDay);
 
     var $divTimeBody = $(document.createElement('div'));
@@ -384,29 +391,29 @@ var Scheduler = (function (element, userConfigs) {
     $tblTimeBody.addClass('sc-table');
 
     for (var i = 0; i < 48; i++) {
-	  var rowTime = (i < 20) ? ('0' + Math.floor(i / 2)) + ':' : Math.floor(i / 2) + ':';
-	  
+      var rowTime = (i < 20) ? ('0' + Math.floor(i / 2)) + ':' : Math.floor(i / 2) + ':';
+      
       var $trTimeBody = $(document.createElement('div'));
       $trTimeBody.addClass('sc-table-row');
       $trTimeBody.addClass('sc-time-row');
       var $tdTimeBody = $(document.createElement('div'));
       $tdTimeBody.addClass('sc-table-row-td');
       $tdTimeBody.addClass('sc-axis');
-	  
+      
       if (i % 2 == 0) {
         var time = ((i % 24) / 2);
         time = ((time == 0) ? 12 : time);
         $tdTimeBody.html('<span>' + time + (i < 24 ? 'am' : 'pm') + '</span>');
-		
-		rowTime += '00';
+        
+        rowTime += '00';
       }
       else {
         $tdTimeBody.addClass('sc-time-second');
-		
-		rowTime += '30';
+        
+        rowTime += '30';
       }
       $trTimeBody.append($tdTimeBody);
-	  $trTimeBody.attr('data-time', rowTime);
+      $trTimeBody.attr('data-time', rowTime);
 
       for (var j = 0; j < 7; j++) {
         $tdTimeBody = $(document.createElement('div'));
@@ -421,7 +428,7 @@ var Scheduler = (function (element, userConfigs) {
     }
     $divTimeBody.append($tblTimeBody);
 
-	$tblTimeEvent.append($trTimeEvent);
+    $tblTimeEvent.append($trTimeEvent);
     $divTimeBody.append($tblTimeEvent);
 
     $parent.append($divTimeBody);
@@ -430,91 +437,91 @@ var Scheduler = (function (element, userConfigs) {
   renderWeekEvent = function ($parent, data) {
     var firstDayWeek = new Date(renderDate);
     firstDayWeek.setDate(firstDayWeek.getDate() - renderDate.getDay());
-	
-	var lastDayWeek = new Date(firstDayWeek);
-	lastDayWeek.setDate(lastDayWeek.getDate() + 7);
+    
+    var lastDayWeek = new Date(firstDayWeek);
+    lastDayWeek.setDate(lastDayWeek.getDate() + 7);
 
     var thisWeekEvents = data.filter(function (el) {
       var start = new Date(el.start);
       var end = new Date(el.end);
 
-	  // Check if start or end day is in between week, else check if start and end day is overlapping week
+      // Check if start or end day is in between week, else check if start and end day is overlapping week
       return (start >= firstDayWeek && start <= lastDayWeek) || (end >= firstDayWeek && end <= lastDayWeek) || (start <= firstDayWeek && end >= lastDayWeek);
     });
-	
-	thisWeekEvents.sort(function(a, b) {
-	  var aHours = hoursBetween(new Date(a.start), new Date(a.end));
-	  var bHours = hoursBetween(new Date(b.start), new Date(b.end));
-	  
-	  return bHours - aHours;
-	});
-	
-	// Calculating overlapping time
-	for (var i = 0; i < thisWeekEvents.length; i++) {
-	  var overlapStart = [];
-	  var overlapMid = [];
-	  var overlapEnd = [];
+    
+    thisWeekEvents.sort(function(a, b) {
+      var aHours = hoursBetween(new Date(a.start), new Date(a.end));
+      var bHours = hoursBetween(new Date(b.start), new Date(b.end));
+      
+      return bHours - aHours;
+    });
+    
+    // Calculating overlapping time
+    for (var i = 0; i < thisWeekEvents.length; i++) {
+      var overlapStart = [];
+      var overlapMid = [];
+      var overlapEnd = [];
       thisWeekEvents[i].start = new Date(thisWeekEvents[i].start);
       thisWeekEvents[i].end = new Date(thisWeekEvents[i].end);
-	  for (var j = 0; j < thisWeekEvents.length; j++) {
+      for (var j = 0; j < thisWeekEvents.length; j++) {
         thisWeekEvents[j].start = new Date(thisWeekEvents[j].start);
         thisWeekEvents[j].end = new Date(thisWeekEvents[j].end);
-		if (i == j) {
-		  overlapStart.push(i);
-		  continue;
-		}
-		else if ((thisWeekEvents[i].start >= thisWeekEvents[j].start && thisWeekEvents[i].start < thisWeekEvents[j].end) 
-			&& (thisWeekEvents[i].start.toDateString() == thisWeekEvents[j].start.toDateString() && thisWeekEvents[i].end.toDateString() == thisWeekEvents[j].end.toDateString())) {
-		  overlapStart.push(j);
-	      //overlapCount++;
-		}
-	  }
-	  
-	  for (var j = 0; j < thisWeekEvents.length; j++) {
-		if (i == j) {
-		  overlapEnd.push(i);
-		  continue;
-		}
-		else if ((thisWeekEvents[i].end > thisWeekEvents[j].start && thisWeekEvents[i].end <= thisWeekEvents[j].end)
-			&& (thisWeekEvents[i].start.toDateString() == thisWeekEvents[j].start.toDateString() && thisWeekEvents[i].end.toDateString() == thisWeekEvents[j].end.toDateString())) {
-		  overlapEnd.push(j);
-		}
-	  }
-	  
-	  for (var j = 0; j < thisWeekEvents.length; j++) {
-		if (i == j) {
-		  overlapMid.push(i);
-		  continue;
-		}
-		else if ((thisWeekEvents[i].start <= thisWeekEvents[j].start && thisWeekEvents[i].end >= thisWeekEvents[j].end)
-			&& (thisWeekEvents[i].start.toDateString() == thisWeekEvents[j].start.toDateString() && thisWeekEvents[i].end.toDateString() == thisWeekEvents[j].end.toDateString())) {
-		  overlapMid.push(j);
-		}
-	  }
-	  
-	  var width = 90 / Math.max(overlapStart.length, overlapEnd.length);
-	  
-	  if (thisWeekEvents[i].width == null)
-	    thisWeekEvents[i].width = width;
-	  else if (thisWeekEvents[i].width > width)
-	    thisWeekEvents[i].width = width;
-	/*
-	  var bigOverlap = ((overlapStart.length > overlapMid.length) ? 
-	    ((overlapStart.length > overlapEnd.length) ? overlapStart : overlapEnd) : 
-		((overlapMid.length > overlapEnd.length) ? overlapMid : overlapEnd));
-	*/
-	  var bigOverlap = ((overlapStart.length > overlapEnd.length) ? overlapStart : overlapEnd);
-		
-	  var index = bigOverlap.indexOf(i);
-	  
-	  for (var j = 0; j < bigOverlap.length; j++) {
-		if (thisWeekEvents[bigOverlap[j]].width > width)
-		  thisWeekEvents[bigOverlap[j]].width = width;
-	  }
-	  
-	  thisWeekEvents[i].left = (index > 0) ? thisWeekEvents[bigOverlap[index - 1]].left + thisWeekEvents[bigOverlap[index - 1]].width : 0;
-	}
-	
+        if (i == j) {
+          overlapStart.push(i);
+          continue;
+        }
+        else if ((thisWeekEvents[i].start >= thisWeekEvents[j].start && thisWeekEvents[i].start < thisWeekEvents[j].end) 
+            && (thisWeekEvents[i].start.toDateString() == thisWeekEvents[j].start.toDateString() && thisWeekEvents[i].end.toDateString() == thisWeekEvents[j].end.toDateString())) {
+          overlapStart.push(j);
+          //overlapCount++;
+        }
+      }
+      
+      for (var j = 0; j < thisWeekEvents.length; j++) {
+        if (i == j) {
+          overlapEnd.push(i);
+          continue;
+        }
+        else if ((thisWeekEvents[i].end > thisWeekEvents[j].start && thisWeekEvents[i].end <= thisWeekEvents[j].end)
+            && (thisWeekEvents[i].start.toDateString() == thisWeekEvents[j].start.toDateString() && thisWeekEvents[i].end.toDateString() == thisWeekEvents[j].end.toDateString())) {
+          overlapEnd.push(j);
+        }
+      }
+      
+      for (var j = 0; j < thisWeekEvents.length; j++) {
+        if (i == j) {
+          overlapMid.push(i);
+          continue;
+        }
+        else if ((thisWeekEvents[i].start <= thisWeekEvents[j].start && thisWeekEvents[i].end >= thisWeekEvents[j].end)
+            && (thisWeekEvents[i].start.toDateString() == thisWeekEvents[j].start.toDateString() && thisWeekEvents[i].end.toDateString() == thisWeekEvents[j].end.toDateString())) {
+          overlapMid.push(j);
+        }
+      }
+      
+      var width = 90 / Math.max(overlapStart.length, overlapEnd.length);
+      
+      if (thisWeekEvents[i].width == null)
+        thisWeekEvents[i].width = width;
+      else if (thisWeekEvents[i].width > width)
+        thisWeekEvents[i].width = width;
+    /*
+      var bigOverlap = ((overlapStart.length > overlapMid.length) ? 
+        ((overlapStart.length > overlapEnd.length) ? overlapStart : overlapEnd) : 
+        ((overlapMid.length > overlapEnd.length) ? overlapMid : overlapEnd));
+    */
+      var bigOverlap = ((overlapStart.length > overlapEnd.length) ? overlapStart : overlapEnd);
+        
+      var index = bigOverlap.indexOf(i);
+      
+      for (var j = 0; j < bigOverlap.length; j++) {
+        if (thisWeekEvents[bigOverlap[j]].width > width)
+          thisWeekEvents[bigOverlap[j]].width = width;
+      }
+      
+      thisWeekEvents[i].left = (index > 0) ? thisWeekEvents[bigOverlap[index - 1]].left + thisWeekEvents[bigOverlap[index - 1]].width : 0;
+    }
+    
     for (var i = 0; i < thisWeekEvents.length; i++) {
       setWeekEvent(thisWeekEvents[i], $parent);
     }
@@ -598,32 +605,32 @@ var Scheduler = (function (element, userConfigs) {
 
     $tblAllDay.append($trAllDay);
     $divAllDay.append($tblAllDay);
-	
-	var $tblAllDayEvent = $(document.createElement('table'));
-	$tblAllDayEvent.addClass('sc-all-day-event');
-	var $trAllDayEvent = $(document.createElement('tr'));
-	var $tdAllDayEvent = $(document.createElement('td'));
+    
+    var $tblAllDayEvent = $(document.createElement('table'));
+    $tblAllDayEvent.addClass('sc-all-day-event');
+    var $trAllDayEvent = $(document.createElement('tr'));
+    var $tdAllDayEvent = $(document.createElement('td'));
     $tdAllDayEvent.addClass('sc-axis');
-	$trAllDayEvent.append($tdAllDayEvent);
-	
-	$tdAllDayEvent = $(document.createElement('td'));
     $trAllDayEvent.append($tdAllDayEvent);
-	
-	$tblAllDayEvent.append($trAllDayEvent);
+    
+    $tdAllDayEvent = $(document.createElement('td'));
+    $trAllDayEvent.append($tdAllDayEvent);
+    
+    $tblAllDayEvent.append($trAllDayEvent);
     $divAllDay.append($tblAllDayEvent);
-	
+    
     $parent.append($divAllDay);
-	
-	var $tblTimeEvent = $(document.createElement('div'));
-	$tblTimeEvent.addClass('sc-table');
-	$tblTimeEvent.addClass('sc-time-event');
+    
+    var $tblTimeEvent = $(document.createElement('div'));
+    $tblTimeEvent.addClass('sc-table');
+    $tblTimeEvent.addClass('sc-time-event');
     var $trTimeEvent = $(document.createElement('div'));
     $trTimeEvent.addClass('sc-table-row');
     var $tdTimeEvent = $(document.createElement('div'));
     $tdTimeEvent.addClass('sc-table-row-td');
     $tdTimeEvent.addClass('sc-axis');
-	$trTimeEvent.append($tdTimeEvent);
-	
+    $trTimeEvent.append($tdTimeEvent);
+    
     $tdTimeEvent = $(document.createElement('div'));
     $tdTimeEvent.addClass('sc-table-row-td');
     $tdTimeEvent.addClass('sc-time-event-col');
@@ -661,10 +668,10 @@ var Scheduler = (function (element, userConfigs) {
       $tblTimeBody.append($trTimeBody);
     }
     $divTimeBody.append($tblTimeBody);
-	
-	$tblTimeEvent.append($trTimeEvent);
+    
+    $tblTimeEvent.append($trTimeEvent);
     $divTimeBody.append($tblTimeEvent);
-	
+    
     $parent.append($divTimeBody);
   };
 
@@ -673,79 +680,79 @@ var Scheduler = (function (element, userConfigs) {
       var start = new Date(el.start);
       var end = new Date(el.end);
 
-	  // Check if start or end day is in between week, else check if start and end day is overlapping week
+      // Check if start or end day is in between week, else check if start and end day is overlapping week
       return (start.toDateString() == renderDate.toDateString() || end.toDateString() == renderDate.toDateString()) || (start <= renderDate && end >= renderDate);
     });
-	
-	thisDayEvents.sort(function(a, b) {
-	  var aHours = hoursBetween(new Date(a.start), new Date(a.end));
-	  var bHours = hoursBetween(new Date(b.start), new Date(b.end));
-	  
-	  return bHours - aHours;
-	});
-	
-	// Calculating overlapping time
-	for (var i = 0; i < thisDayEvents.length; i++) {
-	  var overlapStart = [];
-	  var overlapMid = [];
-	  var overlapEnd = [];
+    
+    thisDayEvents.sort(function(a, b) {
+      var aHours = hoursBetween(new Date(a.start), new Date(a.end));
+      var bHours = hoursBetween(new Date(b.start), new Date(b.end));
+      
+      return bHours - aHours;
+    });
+    
+    // Calculating overlapping time
+    for (var i = 0; i < thisDayEvents.length; i++) {
+      var overlapStart = [];
+      var overlapMid = [];
+      var overlapEnd = [];
       thisDayEvents[i].start = new Date(thisDayEvents[i].start);
       thisDayEvents[i].end = new Date(thisDayEvents[i].end);
-	  for (var j = 0; j < thisDayEvents.length; j++) {
+      for (var j = 0; j < thisDayEvents.length; j++) {
         thisDayEvents[j].start = new Date(thisDayEvents[j].start);
         thisDayEvents[j].end = new Date(thisDayEvents[j].end);
-		if (i == j) {
-		  overlapStart.push(i);
-		  continue;
-		}
-		else if ((thisDayEvents[i].start >= thisDayEvents[j].start && thisDayEvents[i].start < thisDayEvents[j].end)
-			&& (thisDayEvents[i].start.toDateString() == thisDayEvents[j].start.toDateString() && thisDayEvents[i].end.toDateString() == thisDayEvents[j].end.toDateString())) {
-		  overlapStart.push(j);
-	      //overlapCount++;
-		}
-	  }
-	  
-	  for (var j = 0; j < thisDayEvents.length; j++) {
-		if (i == j) {
-		  overlapEnd.push(i);
-		  continue;
-		}
-		else if ((thisDayEvents[i].end > thisDayEvents[j].start && thisDayEvents[i].end <= thisDayEvents[j].end)
-			&& (thisDayEvents[i].start.toDateString() == thisDayEvents[j].start.toDateString() && thisDayEvents[i].end.toDateString() == thisDayEvents[j].end.toDateString())) {
-		  overlapEnd.push(j);
-		}
-	  }
-	  
-	  for (var j = 0; j < thisDayEvents.length; j++) {
-		if (i == j) {
-		  overlapMid.push(i);
-		  continue;
-		}
-		else if ((thisDayEvents[i].start <= thisDayEvents[j].start && thisDayEvents[i].end >= thisDayEvents[j].end)
-			&& (thisDayEvents[i].start.toDateString() == thisDayEvents[j].start.toDateString() && thisDayEvents[i].end.toDateString() == thisDayEvents[j].end.toDateString())) {
-		  overlapMid.push(j);
-		}
-	  }
-	  
-	  var width = 98 / Math.max(overlapStart.length, overlapEnd.length);
-	  
-	  if (thisDayEvents[i].width == null)
-	    thisDayEvents[i].width = width;
-	  else if (thisDayEvents[i].width > width)
-	    thisDayEvents[i].width = width;
-	
-	  var bigOverlap = ((overlapStart.length > overlapEnd.length) ? overlapStart : overlapEnd);
-		
-	  var index = bigOverlap.indexOf(i);
-	  
-	  for (var j = 0; j < bigOverlap.length; j++) {
-		if (thisDayEvents[bigOverlap[j]].width > width)
-		  thisDayEvents[bigOverlap[j]].width = width;
-	  }
-	  
-	  thisDayEvents[i].left = (index > 0) ? thisDayEvents[bigOverlap[index - 1]].left + thisDayEvents[bigOverlap[index - 1]].width : 0;
-	}
-	
+        if (i == j) {
+          overlapStart.push(i);
+          continue;
+        }
+        else if ((thisDayEvents[i].start >= thisDayEvents[j].start && thisDayEvents[i].start < thisDayEvents[j].end)
+            && (thisDayEvents[i].start.toDateString() == thisDayEvents[j].start.toDateString() && thisDayEvents[i].end.toDateString() == thisDayEvents[j].end.toDateString())) {
+          overlapStart.push(j);
+          //overlapCount++;
+        }
+      }
+      
+      for (var j = 0; j < thisDayEvents.length; j++) {
+        if (i == j) {
+          overlapEnd.push(i);
+          continue;
+        }
+        else if ((thisDayEvents[i].end > thisDayEvents[j].start && thisDayEvents[i].end <= thisDayEvents[j].end)
+            && (thisDayEvents[i].start.toDateString() == thisDayEvents[j].start.toDateString() && thisDayEvents[i].end.toDateString() == thisDayEvents[j].end.toDateString())) {
+          overlapEnd.push(j);
+        }
+      }
+      
+      for (var j = 0; j < thisDayEvents.length; j++) {
+        if (i == j) {
+          overlapMid.push(i);
+          continue;
+        }
+        else if ((thisDayEvents[i].start <= thisDayEvents[j].start && thisDayEvents[i].end >= thisDayEvents[j].end)
+            && (thisDayEvents[i].start.toDateString() == thisDayEvents[j].start.toDateString() && thisDayEvents[i].end.toDateString() == thisDayEvents[j].end.toDateString())) {
+          overlapMid.push(j);
+        }
+      }
+      
+      var width = 98 / Math.max(overlapStart.length, overlapEnd.length);
+      
+      if (thisDayEvents[i].width == null)
+        thisDayEvents[i].width = width;
+      else if (thisDayEvents[i].width > width)
+        thisDayEvents[i].width = width;
+    
+      var bigOverlap = ((overlapStart.length > overlapEnd.length) ? overlapStart : overlapEnd);
+        
+      var index = bigOverlap.indexOf(i);
+      
+      for (var j = 0; j < bigOverlap.length; j++) {
+        if (thisDayEvents[bigOverlap[j]].width > width)
+          thisDayEvents[bigOverlap[j]].width = width;
+      }
+      
+      thisDayEvents[i].left = (index > 0) ? thisDayEvents[bigOverlap[index - 1]].left + thisDayEvents[bigOverlap[index - 1]].width : 0;
+    }
+    
     for (var i = 0; i < thisDayEvents.length; i++) {
       setDayEvent(thisDayEvents[i], $parent);
     }
@@ -862,9 +869,9 @@ var Scheduler = (function (element, userConfigs) {
       while (days > 0) {
         var createNewRow = false;
         $startTd = $parent.find('td[data-goto="' + trueStart.toDateString() + '"]');
-		if ($startTd.length == 0) {
-		  break;
-		}
+        if ($startTd.length == 0) {
+          break;
+        }
         var $parentTable = $startTd.closest('table');
         var colIndex = $startTd[0].cellIndex;
 
@@ -934,48 +941,48 @@ var Scheduler = (function (element, userConfigs) {
   };
   
   setWeekEvent = function (event, $parent = $('.sc .sc-week-body')) {
-	var start = new Date(event.start),
+    var start = new Date(event.start),
       end = new Date(event.end),
       title = event.title,
       $divEvent = $(document.createElement('div'));
       $divEvent.html('<span>' + start.getHours() + ' - ' + end.getHours() + '</span><span>' + title + '</span>');
-	
-	if (start.toDateString() == end.toDateString()) {
+    
+    if (start.toDateString() == end.toDateString()) {
       $divEvent.addClass('sc-time-event-item');
-	  var startPosition = start.getHours() * 40;
-	  startPosition += Math.round((start.getMinutes() / 60) * 40);
-	  var eventHeight = Math.round(hoursBetween(start, end) * 40);
-	  
-	  $divEvent.css({ top: startPosition + 'px', height: eventHeight + 'px', width: event.width + '%', left: event.left + '%' });
-	  
-	  var colIndex = $('.sc .sc-week-head').find('div[data-date="' + start.toDateString() + '"]').index();
-	  
-	  var $column = $parent.find('.sc-time-event > .sc-table-row').children().eq(colIndex);
-	  
-	  $column.append($divEvent);
-	} 
-	else {
-	  var startColIndex = $('.sc .sc-week-head').find('div[data-date="' + start.toDateString() + '"]').index();
-	  var endColIndex = $('.sc .sc-week-head').find('div[data-date="' + end.toDateString() + '"]').index();
-	  
+      var startPosition = start.getHours() * 40;
+      startPosition += Math.round((start.getMinutes() / 60) * 40);
+      var eventHeight = Math.round(hoursBetween(start, end) * 40);
+      
+      $divEvent.css({ top: startPosition + 'px', height: eventHeight + 'px', width: event.width + '%', left: event.left + '%' });
+      
+      var colIndex = $('.sc .sc-week-head').find('div[data-date="' + start.toDateString() + '"]').index();
+      
+      var $column = $parent.find('.sc-time-event > .sc-table-row').children().eq(colIndex);
+      
+      $column.append($divEvent);
+    } 
+    else {
+      var startColIndex = $('.sc .sc-week-head').find('div[data-date="' + start.toDateString() + '"]').index();
+      var endColIndex = $('.sc .sc-week-head').find('div[data-date="' + end.toDateString() + '"]').index();
+      
       $divEvent.addClass('sc-event-item');
-	  
-	  if (startColIndex != -1) {
-	  }
-	  else {
-		startColIndex = 1;
-	  }
-	  
-	  if (endColIndex != -1) {
-	  }
-	  else {
-		endColIndex = 7;
-	  }
-	  
+      
+      if (startColIndex != -1) {
+      }
+      else {
+        startColIndex = 1;
+      }
+      
+      if (endColIndex != -1) {
+      }
+      else {
+        endColIndex = 7;
+      }
+      
       var $parentTable = $('.sc .sc-all-day-event');
-	  var foundEmpty;
-	  
-	  var table = $parentTable[0];
+      var foundEmpty;
+      
+      var table = $parentTable[0];
       for (var i = 0, row; row = table.rows[i]; i++) {
         //iterate through rows
         //rows would be accessed using the "row" variable assigned in the for loop
@@ -983,96 +990,96 @@ var Scheduler = (function (element, userConfigs) {
         for (var j = startColIndex, cell; cell = row.cells[j]; j++) {
           //iterate through columns
           //columns would be accessed using the "cell" variable assigned in the for loop
-		  if ($(cell).html() != '' || $(cell).css('display') == 'none') {
-			foundEmpty = false;
-		  }
-		  if (endColIndex == j) {
-			break;
-		  }
-        }
-		
-		if (foundEmpty) {
-          var colspan = endColIndex - startColIndex + 1;
-		  for (var j = startColIndex, cell; cell = row.cells[j]; j++) {
-		    if (endColIndex == j) {
-              $(cell).append($divEvent);
-			  $(cell).attr('colspan', colspan);
-		      break;
-		    }
-			else {
-			  $(cell).hide();
-			}
+          if ($(cell).html() != '' || $(cell).css('display') == 'none') {
+            foundEmpty = false;
           }
-		  break;
-		}
-      }
-	  
-	  if (!foundEmpty) {
-        var newRow = $parentTable[0].insertRow($parentTable[0].rows.length);
-		
-		for (i = 0; i < 8; i++) {
-          var cell = newRow.insertCell(i);
-		  var colspan = endColIndex - startColIndex + 1;
-          
-		  if (i == endColIndex) {
-			$(cell).append($divEvent);
-			$(cell).attr('colspan', colspan);
-		  }
-		  else if (i >= startColIndex) {
-		    $(cell).hide();
-		  }
+          if (endColIndex == j) {
+            break;
+          }
         }
-	  }
-	  
-	  $('.sc .sc-all-day-wrapper').css({ height: ($parentTable[0].rows.length * 22) + 'px' });
-	}
+        
+        if (foundEmpty) {
+          var colspan = endColIndex - startColIndex + 1;
+          for (var j = startColIndex, cell; cell = row.cells[j]; j++) {
+            if (endColIndex == j) {
+              $(cell).append($divEvent);
+              $(cell).attr('colspan', colspan);
+              break;
+            }
+            else {
+              $(cell).hide();
+            }
+          }
+          break;
+        }
+      }
+      
+      if (!foundEmpty) {
+        var newRow = $parentTable[0].insertRow($parentTable[0].rows.length);
+        
+        for (i = 0; i < 8; i++) {
+          var cell = newRow.insertCell(i);
+          var colspan = endColIndex - startColIndex + 1;
+          
+          if (i == endColIndex) {
+            $(cell).append($divEvent);
+            $(cell).attr('colspan', colspan);
+          }
+          else if (i >= startColIndex) {
+            $(cell).hide();
+          }
+        }
+      }
+      
+      $('.sc .sc-all-day-wrapper').css({ height: ($parentTable[0].rows.length * 22) + 'px' });
+    }
   };
   
   setDayEvent = function (event, $parent = $('.sc .sc-week-body')) {
-	var start = new Date(event.start),
+    var start = new Date(event.start),
       end = new Date(event.end),
       title = event.title,
       $divEvent = $(document.createElement('div'));
       $divEvent.html('<span>' + start.getHours() + ' - ' + end.getHours() + '</span><span>' + title + '</span>');
-	
-	if (start.toDateString() == end.toDateString()) {
+    
+    if (start.toDateString() == end.toDateString()) {
       $divEvent.addClass('sc-time-event-item');
-	  var startPosition = start.getHours() * 40;
-	  startPosition += Math.round((start.getMinutes() / 60) * 40);
-	  var eventHeight = Math.round(hoursBetween(start, end) * 40);
-	  
-	  $divEvent.css({ top: startPosition + 'px', height: eventHeight + 'px', width: event.width + '%', left: event.left + '%' });
-	  
-	  var $column = $parent.find('.sc-time-event > .sc-table-row').children().eq(1);
-	  
-	  $column.append($divEvent);
-	}
+      var startPosition = start.getHours() * 40;
+      startPosition += Math.round((start.getMinutes() / 60) * 40);
+      var eventHeight = Math.round(hoursBetween(start, end) * 40);
+      
+      $divEvent.css({ top: startPosition + 'px', height: eventHeight + 'px', width: event.width + '%', left: event.left + '%' });
+      
+      var $column = $parent.find('.sc-time-event > .sc-table-row').children().eq(1);
+      
+      $column.append($divEvent);
+    }
     else {
       $divEvent.addClass('sc-event-item');
-	  var $parentTable = $('.sc .sc-all-day-event');
-	  
-	  var $cell = $($parentTable[0].rows[0].cells[1]);
-	  $cell.append($divEvent);
-	  
-	  $('.sc .sc-all-day-wrapper').css({ height: ($cell.children().length * 22) + 'px' });
+      var $parentTable = $('.sc .sc-all-day-event');
+      
+      var $cell = $($parentTable[0].rows[0].cells[1]);
+      $cell.append($divEvent);
+      
+      $('.sc .sc-all-day-wrapper').css({ height: ($cell.children().length * 22) + 'px' });
     }
   };
   
   addEvents = function (events) {
     if (configs.mode == 'month') {
-	  for (var i = 0, event; event = events; i++) {
+      for (var i = 0, event; event = events; i++) {
         setMonthEvent(event);
-	  }
+      }
     }
     else if (configs.mode == 'week') {
-	  for (var i = 0, event; event = events; i++) {
+      for (var i = 0, event; event = events; i++) {
         setWeekEvent(event);
-	  }
+      }
     }
     else if (configs.mode == 'day') {
-	  for (var i = 0, event; event = events; i++) {
+      for (var i = 0, event; event = events; i++) {
         setDayEvent(event);
-	  }
+      }
     }
   };
 
@@ -1096,35 +1103,35 @@ var Scheduler = (function (element, userConfigs) {
   };
   
   hoursBetween = function (startDate, endDate) {
-	return (Math.abs(treatAsUTC(startDate) - treatAsUTC(endDate)) / 36e5);
+    return (Math.abs(treatAsUTC(startDate) - treatAsUTC(endDate)) / 36e5);
   };
   
   refreshHeader = function () {
-	$('.sc-header').find('.sc-table-row-th > span.sc-header-day-text').each(function() {
-	  var index;
-	  var headerText = $(this).html();
-	  
-	  if (headerText.length > 3) {
-		index = days.indexOf(headerText);
-	  }
-	  else {
-		index = shortDays.indexOf(headerText);
-	  }
-	  
+    $('.sc-header').find('.sc-table-row-th > span.sc-header-day-text').each(function() {
+      var index;
+      var headerText = $(this).html();
+      
+      if (headerText.length > 3) {
+        index = days.indexOf(headerText);
+      }
+      else {
+        index = shortDays.indexOf(headerText);
+      }
+      
       $(this).html(getDayString(index));
-	});
+    });
   }
   
   var mql = window.matchMedia('(max-width: 699px)');
   mql.addListener(function(e){
-	if (shortDisplay != e.matches) {
-	  shortDisplay = e.matches;
-	  refreshToolbarTitle();
-	  refreshHeader();
-	}
-	else {
-	  shortDisplay = e.matches;
-	}
+    if (shortDisplay != e.matches) {
+      shortDisplay = e.matches;
+      refreshToolbarTitle();
+      refreshHeader();
+    }
+    else {
+      shortDisplay = e.matches;
+    }
   });
 
   init();
@@ -1134,7 +1141,7 @@ var Scheduler = (function (element, userConfigs) {
     refreshView: refreshView,
     prevView: prevView,
     nextView: nextView,
-	refreshHeader: refreshHeader,
+    refreshHeader: refreshHeader,
     addEvents: addEvents
   };
 });
