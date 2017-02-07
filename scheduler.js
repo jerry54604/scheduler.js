@@ -391,7 +391,7 @@ var Scheduler = (function (element, userConfigs) {
     $tblTimeBody.addClass('sc-table');
 
     for (var i = 0; i < 48; i++) {
-      var rowTime = (i < 20) ? ('0' + Math.floor(i / 2)) + ':' : Math.floor(i / 2) + ':';
+      var rowTime = formatNumber(Math.floor(i / 2)) + ':';
       
       var $trTimeBody = $(document.createElement('div'));
       $trTimeBody.addClass('sc-table-row');
@@ -642,6 +642,7 @@ var Scheduler = (function (element, userConfigs) {
     $tblTimeBody.addClass('sc-table');
 
     for (var i = 0; i < 48; i++) {
+      var rowTime = formatNumber(Math.floor(i / 2)) + ':';
       var $trTimeBody = $(document.createElement('div'));
       $trTimeBody.addClass('sc-table-row');
       $trTimeBody.addClass('sc-time-row');
@@ -652,11 +653,14 @@ var Scheduler = (function (element, userConfigs) {
         var time = ((i % 24) / 2);
         time = ((time == 0) ? 12 : time);
         $tdTimeBody.html('<span>' + time + (i < 24 ? 'am' : 'pm') + '</span>');
+		rowTime += '00';
       }
       else {
         $tdTimeBody.addClass('sc-time-second');
+		rowTime += '30';
       }
       $trTimeBody.append($tdTimeBody);
+      $trTimeBody.attr('data-time', rowTime);
 
       $tdTimeBody = $(document.createElement('div'));
       $tdTimeBody.addClass('sc-table-row-td');
@@ -945,7 +949,8 @@ var Scheduler = (function (element, userConfigs) {
       end = new Date(event.end),
       title = event.title,
       $divEvent = $(document.createElement('div'));
-      $divEvent.html('<span>' + start.getHours() + ' - ' + end.getHours() + '</span><span>' + title + '</span>');
+      $divEvent.html('<span>' + formatNumber(start.getHours()) + formatNumber(start.getMinutes())
+	    + ' - ' + formatNumber(end.getHours()) + formatNumber(end.getMinutes()) + '</span><span>' + title + '</span>');
     
     if (start.toDateString() == end.toDateString()) {
       $divEvent.addClass('sc-time-event-item');
@@ -1040,7 +1045,8 @@ var Scheduler = (function (element, userConfigs) {
       end = new Date(event.end),
       title = event.title,
       $divEvent = $(document.createElement('div'));
-      $divEvent.html('<span>' + start.getHours() + ' - ' + end.getHours() + '</span><span>' + title + '</span>');
+      $divEvent.html('<span>' + formatNumber(start.getHours()) + formatNumber(start.getMinutes()) 
+	    + ' - ' + formatNumber(end.getHours()) + formatNumber(end.getMinutes()) + '</span><span>' + title + '</span>');
     
     if (start.toDateString() == end.toDateString()) {
       $divEvent.addClass('sc-time-event-item');
@@ -1106,6 +1112,10 @@ var Scheduler = (function (element, userConfigs) {
     return (Math.abs(treatAsUTC(startDate) - treatAsUTC(endDate)) / 36e5);
   };
   
+  formatNumber = function (n) {
+	return (n < 10) ? ('0' + n) : n;
+  };
+  
   refreshHeader = function () {
     $('.sc-header').find('.sc-table-row-th > span.sc-header-day-text').each(function() {
       var index;
@@ -1120,7 +1130,7 @@ var Scheduler = (function (element, userConfigs) {
       
       $(this).html(getDayString(index));
     });
-  }
+  };
   
   var mql = window.matchMedia('(max-width: 699px)');
   mql.addListener(function(e){
@@ -1141,7 +1151,6 @@ var Scheduler = (function (element, userConfigs) {
     refreshView: refreshView,
     prevView: prevView,
     nextView: nextView,
-    refreshHeader: refreshHeader,
     addEvents: addEvents
   };
 });
