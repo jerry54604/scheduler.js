@@ -949,10 +949,10 @@ var Scheduler = (function (element, userConfigs) {
       end = new Date(event.end),
       title = event.title,
       $divEvent = $(document.createElement('div'));
-      $divEvent.html('<span>' + formatNumber(start.getHours()) + formatNumber(start.getMinutes())
-	    + ' - ' + formatNumber(end.getHours()) + formatNumber(end.getMinutes()) + '</span><span>' + title + '</span>');
     
     if (start.toDateString() == end.toDateString()) {
+      $divEvent.html('<span>' + formatNumber(start.getHours()) + formatNumber(start.getMinutes())
+	    + ' - ' + formatNumber(end.getHours()) + formatNumber(end.getMinutes()) + '</span><span>' + title + '</span>');
       $divEvent.addClass('sc-time-event-item');
       var startPosition = start.getHours() * 40;
       startPosition += Math.round((start.getMinutes() / 60) * 40);
@@ -967,10 +967,11 @@ var Scheduler = (function (element, userConfigs) {
       $column.append($divEvent);
     } 
     else {
+      $divEvent.html('<span>' + title + '</span>');
+      $divEvent.addClass('sc-event-item');
+	  
       var startColIndex = $('.sc .sc-week-head').find('div[data-date="' + start.toDateString() + '"]').index();
       var endColIndex = $('.sc .sc-week-head').find('div[data-date="' + end.toDateString() + '"]').index();
-      
-      $divEvent.addClass('sc-event-item');
       
       if (startColIndex != -1) {
       }
@@ -1045,10 +1046,10 @@ var Scheduler = (function (element, userConfigs) {
       end = new Date(event.end),
       title = event.title,
       $divEvent = $(document.createElement('div'));
-      $divEvent.html('<span>' + formatNumber(start.getHours()) + formatNumber(start.getMinutes()) 
-	    + ' - ' + formatNumber(end.getHours()) + formatNumber(end.getMinutes()) + '</span><span>' + title + '</span>');
     
     if (start.toDateString() == end.toDateString()) {
+      $divEvent.html('<span>' + formatNumber(start.getHours()) + formatNumber(start.getMinutes()) 
+	    + ' - ' + formatNumber(end.getHours()) + formatNumber(end.getMinutes()) + '</span><span>' + title + '</span>');
       $divEvent.addClass('sc-time-event-item');
       var startPosition = start.getHours() * 40;
       startPosition += Math.round((start.getMinutes() / 60) * 40);
@@ -1061,6 +1062,7 @@ var Scheduler = (function (element, userConfigs) {
       $column.append($divEvent);
     }
     else {
+      $divEvent.html('<span>' + title + '</span>');
       $divEvent.addClass('sc-event-item');
       var $parentTable = $('.sc .sc-all-day-event');
       
