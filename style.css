@@ -62,7 +62,6 @@
 
 .sc .sc-axis {
 	width: 60px;
-	padding: 2px;
 }
 
 .sc .sc-time-row-wrapper, .sc .sc-all-day-wrapper {
@@ -87,7 +86,7 @@
 }
 
 .sc .sc-all-day > .sc-table-row-td {
-	border-bottom-width: 1px;
+	border-bottom-width: 2px;
 	border-bottom-style: solid;
 }
 
@@ -198,6 +197,7 @@
 	}
 	
 	.sc .sc-event-item, .sc .sc-event-items {
-		background: #EEE;
+		border: 1px solid #00c6d0;
+		background: #f0feff;
 	}
 }
