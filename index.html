@@ -9,6 +9,15 @@
 		<div class="divcalendar"></div>
 		<script src="scheduler.js"></script>
 		<script>
+            var today = new Date();
+            var tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            var yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            var nextWeek = new Date(today);
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            var lastWeek = new Date(today);
+            lastWeek.setDate(lastWeek.getDate() - 7);
 			var data = [
 				{
 					title: 'Testing Vac',
@@ -89,6 +98,26 @@
 					title: 'Testing Nu',
 					start: 'Thu, 2 Feb 2017 02:00:00 GMT',
 					end: 'Tue, 7 Feb 2017 06:00:00 GMT'
+				},
+                {
+					title: 'Testing Vac',
+					start: today.toDateString() + ' 03:00:00',
+					end: today.toDateString() + ' 04:00:00'
+				},
+                {
+					title: 'Testing Long Event',
+					start: lastWeek.toDateString() + ' 03:00:00',
+					end: nextWeek.toDateString() + ' 16:00:00'
+				},
+                {
+					title: 'VAC ban incoming',
+					start: yesterday.toDateString() + ' 03:00:00',
+					end: tomorrow.toDateString() + ' 04:00:00'
+				},
+                {
+					title: 'For tomorrow me',
+					start: tomorrow.toDateString() + ' 12:00:00',
+					end: tomorrow.toDateString() + ' 13:00:00'
 				}
 			];
 			$('.divcalendar').scheduler({ test: true, data: data });
