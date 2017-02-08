@@ -18,6 +18,8 @@
             nextWeek.setDate(nextWeek.getDate() + 7);
             var lastWeek = new Date(today);
             lastWeek.setDate(lastWeek.getDate() - 7);
+            var firstDateMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            var lastDateMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 			var data = [
 				{
 					title: 'Testing Vac',
@@ -110,6 +112,11 @@
 					end: nextWeek.toDateString() + ' 16:00:00'
 				},
                 {
+					title: 'Testing Next week',
+					start: nextWeek.toDateString() + ' 03:00:00',
+					end: nextWeek.toDateString() + ' 16:00:00'
+				},
+                {
 					title: 'VAC ban incoming',
 					start: yesterday.toDateString() + ' 03:00:00',
 					end: tomorrow.toDateString() + ' 04:00:00'
@@ -118,6 +125,16 @@
 					title: 'For tomorrow me',
 					start: tomorrow.toDateString() + ' 12:00:00',
 					end: tomorrow.toDateString() + ' 13:00:00'
+				},
+                {
+					title: 'Alpha',
+					start: firstDateMonth.toDateString() + ' 12:00:00',
+					end: firstDateMonth.toDateString() + ' 13:00:00'
+				},
+                {
+					title: 'Last',
+					start: lastDateMonth.toDateString() + ' 12:00:00',
+					end: lastDateMonth.toDateString() + ' 23:00:00'
 				}
 			];
 			$('.divcalendar').scheduler({ test: true, data: data });

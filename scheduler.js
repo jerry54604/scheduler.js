@@ -877,6 +877,7 @@ var Scheduler = (function (element, userConfigs) {
               if (days == 0 || colIndex == 7) {
                 var $divEvents = $(document.createElement('div'));
                 $divEvents.addClass('sc-event-items');
+                $divEvents.css({ top: newRow.rowIndex * -1.6 });
                 $divEvents.html('<span>' + title + '</span>');
                 $(cell).attr('colspan', colspan);
                 $(cell).append($divEvents);
