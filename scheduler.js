@@ -559,6 +559,7 @@ var Scheduler = (function (element, userConfigs) {
 
     $thHeader = $(document.createElement('div'));
     $thHeader.addClass('sc-table-row-th');
+    $thHeader.attr('data-date', renderDate.toDateString());
     $thHeader.html('<span class="sc-header-day-text">' + getDayString(renderDate.getDay()) + '</span><span> '
       + (renderDate.getMonth() + 1) + '/' + renderDate.getDate() + '</span>');
     $trHeader.append($thHeader);
@@ -959,6 +960,10 @@ var Scheduler = (function (element, userConfigs) {
         endColIndex = 7;
       }
       
+      if (end.getHours() == 0 && end.getMinutes() == 0) {
+        endColIndex--;
+      }
+      
       var $parentTable = $('.sc .sc-all-day-event');
       var foundEmpty;
       
@@ -1036,6 +1041,10 @@ var Scheduler = (function (element, userConfigs) {
       $column.append($divEvent);
     }
     else {
+      if (end.getHours() == 0 && end.getMinutes() == 0 && $('.sc .sc-day-head').find('div[data-date="' + end.toDateString() + '"]').length == 1) {
+        return;
+      }
+      
       $divEvent.html('<span>' + title + '</span>');
       $divEvent.addClass('sc-event-item');
       var $parentTable = $('.sc .sc-all-day-event');
