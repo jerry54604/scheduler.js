@@ -1120,11 +1120,27 @@ var Scheduler = (function (element, userConfigs) {
       var dataLength = configs.data.length, length = events.length;
       for (var i = 0; i < length; i++) {
         events[i].$id = dataLength + i;
+        events[i].start = new Date(events[i].start);
+        if (events[i].end) {
+          events[i].end = new Date(events[i].end);
+        }
+        else {
+          events[i].end = new Date(events[i].start);
+          events[i].end.setHours(events[i].end.getHours() + 24);
+        }
       }
       configs.data = configs.data.concat(events);
     }
     else {
       events.$id = configs.data.length;
+      events.start = new Date(events.start);
+      if (configs.data[i].end) {
+        events.end = new Date(events.end);
+      }
+      else {
+        events.end = new Date(events.start);
+        events.end.setHours(events.end.getHours() + 24);
+      }
       configs.data.push(events);
     }
     
