@@ -1143,7 +1143,7 @@ var Scheduler = (function (element, userConfigs) {
     else {
       events.$id = configs.data.length;
       events.start = new Date(events.start);
-      if (configs.data[i].end) {
+      if (configs.data[i] && configs.data[i].end) {
         events.end = new Date(events.end);
       }
       else {
