@@ -13,6 +13,7 @@ var Scheduler = (function (element, userConfigs) {
   shortDisplay: false;
   $currentView = $(document.createElement('div'));
   $divToolbar = $(document.createElement('div'));
+  mediaQuery = window.matchMedia('(max-width: 699px)');
 
   init = function () {
     setConfig();
@@ -256,13 +257,6 @@ var Scheduler = (function (element, userConfigs) {
 
       // Check if start or end day is in between calendar dates, else check if start and end day is overlapping calendar dates
       return (start >= calendarStartDate && start <= calendarEndDate) || (end >= calendarStartDate && end <= calendarEndDate) || (start <= calendarStartDate && end >= calendarEndDate);
-    });
-    
-    thisMonthEvents.sort(function(a, b) {
-      var aHours = hoursBetween(new Date(a.start), new Date(a.end));
-      var bHours = hoursBetween(new Date(b.start), new Date(b.end));
-      
-      return bHours - aHours;
     });
 
     for (var i = 0; i < thisMonthEvents.length; i++) {
@@ -1052,25 +1046,29 @@ var Scheduler = (function (element, userConfigs) {
       var $cell = $($parentTable[0].rows[0].cells[1]);
       $cell.append($divEvent);
       
-      $('.sc .sc-all-day-wrapper').css({ height: ($cell.children().length * 22) + 'px' });
+      $('.sc .sc-all-day-wrapper').css({ height: ($cell.children().length * 24) + 'px' });
     }
   };
   
   processData = function () {
-    var length = configs.data.length;
-    for (var i = 0; i < length; i++) {
-      configs.data[i].start = new Date(configs.data[i].start);
-      if (configs.data[i].end) {
-        configs.data[i].end = new Date(configs.data[i].end);
+    configs.data = configs.data.map(function (item, index) {
+      item.start = new Date(item.start);
+      if (item.end) {
+        item.end = new Date(item.end);
       }
       else {
-        configs.data[i].end = new Date(configs.data[i].start);
-        configs.data[i].end.setHours(configs.data[i].end.getHours() + 24);
+        item.end = new Date(item.start);
+        item.end.setHours(item.end.getHours() + 24);
       }
+      item.$id = index;
       
-      configs.data[i].$id = i;
-    }
+      return item;
+    });
     
+    sortDataDesc();
+  };
+  
+  sortDataDesc = function () {
     configs.data.sort(function(a, b) {
       var aHours = hoursBetween(new Date(a.start), new Date(a.end));
       var bHours = hoursBetween(new Date(b.start), new Date(b.end));
@@ -1126,24 +1124,26 @@ var Scheduler = (function (element, userConfigs) {
   
   addEvents = function (events) {
     if (events instanceof Array) {
-      var dataLength = configs.data.length, length = events.length;
-      for (var i = 0; i < length; i++) {
-        events[i].$id = dataLength + i;
-        events[i].start = new Date(events[i].start);
-        if (events[i].end) {
-          events[i].end = new Date(events[i].end);
+      var dataLength = configs.data.length;
+      
+      configs.data = configs.data.concat(events.map(function (item, index) {
+        item.start = new Date(item.start);
+        if (item.end) {
+          item.end = new Date(item.end);
         }
         else {
-          events[i].end = new Date(events[i].start);
-          events[i].end.setHours(events[i].end.getHours() + 24);
+          item.end = new Date(item.start);
+          item.end.setHours(item.end.getHours() + 24);
         }
-      }
-      configs.data = configs.data.concat(events);
+        item.$id = dataLength + index;
+      
+        return item;
+      }));
     }
     else {
       events.$id = configs.data.length;
       events.start = new Date(events.start);
-      if (configs.data[i] && configs.data[i].end) {
+      if (events.end) {
         events.end = new Date(events.end);
       }
       else {
@@ -1153,6 +1153,7 @@ var Scheduler = (function (element, userConfigs) {
       configs.data.push(events);
     }
     
+    sortDataDesc();
     refreshEvents();
   };
   
@@ -1199,8 +1200,7 @@ var Scheduler = (function (element, userConfigs) {
 	return (n < 10) ? ('0' + n) : n;
   };
   
-  var mql = window.matchMedia('(max-width: 699px)');
-  mql.addListener(function(e){
+  mediaQuery.addListener(function(e){
     if (shortDisplay != e.matches) {
       shortDisplay = e.matches;
       refreshToolbarTitle();
