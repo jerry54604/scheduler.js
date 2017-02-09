@@ -14,6 +14,7 @@ var Scheduler = (function (element, userConfigs) {
   $currentView = $(document.createElement('div'));
   $divToolbar = $(document.createElement('div'));
   mediaQuery = window.matchMedia('(max-width: 699px)');
+  eventCount = 0;
 
   init = function () {
     setConfig();
@@ -34,9 +35,12 @@ var Scheduler = (function (element, userConfigs) {
   };
 
   refreshView = function (data) {
-    refreshToolbarTitle();
-    clearBody();
-    renderBody(data);
+    $currentView.fadeOut(200, function () {
+      refreshToolbarTitle();
+      clearBody();
+      renderBody(data);
+      $currentView.show();
+    });
   };
 
   refreshToolbarTitle = function () {
@@ -222,7 +226,7 @@ var Scheduler = (function (element, userConfigs) {
         $trCalendar.append($thCalendar);
 
         var $tdEvent = $(document.createElement('td'));
-        $tdEvent.attr('data-goto', currentDate.toDateString());
+        $tdEvent.attr('data-date', currentDate.toDateString());
         $trEvent.append($tdEvent);
 
         currentDate.setDate(currentDate.getDate() + 1);
@@ -791,10 +795,11 @@ var Scheduler = (function (element, userConfigs) {
       title = event.title,
       $divEvent = $(document.createElement('div'));
       $divEvent.addClass('sc-event-item');
+      $divEvent.attr('data-identity', event.$id);
       $divEvent.html('<span>' + start.toLocaleTimeString() + '</span><span>' + title + '</span>');
 
     if (start.toDateString() == end.toDateString()) {
-      var $startTd = $parent.find('td[data-goto="' + start.toDateString() + '"]');
+      var $startTd = $parent.find('td[data-date="' + start.toDateString() + '"]');
       if($startTd.html() == '' && $startTd.css('display') != 'none') {
         $divEvent.addClass('sc-event-first-item');
         $startTd.append($divEvent);
@@ -827,7 +832,7 @@ var Scheduler = (function (element, userConfigs) {
     else {
       var days = daysBetween(start.toDateString(), end.toDateString()) + 1; // Plus 1 for counting days
       var trueStart = new Date(start);
-      var $startTd = $parent.find('td[data-goto="' + start.toDateString() + '"]');
+      var $startTd = $parent.find('td[data-date="' + start.toDateString() + '"]');
       var isLastMonth = false;
 
       if ($startTd.length == 0) {
@@ -841,7 +846,7 @@ var Scheduler = (function (element, userConfigs) {
 
       while (days > 0) {
         var createNewRow = false;
-        $startTd = $parent.find('td[data-goto="' + trueStart.toDateString() + '"]');
+        $startTd = $parent.find('td[data-date="' + trueStart.toDateString() + '"]');
         if ($startTd.length == 0) {
           break;
         }
@@ -877,6 +882,7 @@ var Scheduler = (function (element, userConfigs) {
               if (days == 0 || colIndex == 7) {
                 var $divEvents = $(document.createElement('div'));
                 $divEvents.addClass('sc-event-items');
+                $divEvents.attr('data-identity', event.$id);
                 $divEvents.css({ top: newRow.rowIndex * -1.6 });
                 $divEvents.html('<span>' + title + '</span>');
                 $(cell).attr('colspan', colspan);
@@ -899,6 +905,7 @@ var Scheduler = (function (element, userConfigs) {
               if (days == 0 || colIndex == 7) {
                 var $divEvents = $(document.createElement('div'));
                 $divEvents.addClass('sc-event-items');
+                $divEvents.attr('data-identity', event.$id);
                 $divEvents.html('<span>' + title + '</span>');
                 $(cell).attr('colspan', colspan);
                 $(cell).append($divEvents);
@@ -919,6 +926,7 @@ var Scheduler = (function (element, userConfigs) {
       end = new Date(event.end),
       title = event.title,
       $divEvent = $(document.createElement('div'));
+      $divEvent.attr('data-identity', event.$id);
     
     if (start.toDateString() == end.toDateString()) {
       $divEvent.html('<span>' + formatNumber(start.getHours()) + formatNumber(start.getMinutes())
@@ -1020,6 +1028,7 @@ var Scheduler = (function (element, userConfigs) {
       end = new Date(event.end),
       title = event.title,
       $divEvent = $(document.createElement('div'));
+      $divEvent.attr('data-identity', event.$id);
     
     if (start.toDateString() == end.toDateString()) {
       $divEvent.html('<span>' + formatNumber(start.getHours()) + formatNumber(start.getMinutes()) 
@@ -1065,6 +1074,8 @@ var Scheduler = (function (element, userConfigs) {
       
       return item;
     });
+    
+    eventCount = configs.data.length;
     
     sortDataDesc();
   };
@@ -1124,9 +1135,7 @@ var Scheduler = (function (element, userConfigs) {
   };
   
   addEvents = function (events) {
-    if (events instanceof Array) {
-      var dataLength = configs.data.length;
-      
+    if (events instanceof Array) {      
       configs.data = configs.data.concat(events.map(function (item, index) {
         item.start = new Date(item.start);
         if (item.end) {
@@ -1136,13 +1145,15 @@ var Scheduler = (function (element, userConfigs) {
           item.end = new Date(item.start);
           item.end.setHours(item.end.getHours() + 24);
         }
-        item.$id = dataLength + index;
-      
+        item.$id = eventCount;
+        eventCount++;
+        
         return item;
       }));
     }
     else {
-      events.$id = configs.data.length;
+      events.$id = eventCount;
+      eventCount++;
       events.start = new Date(events.start);
       if (events.end) {
         events.end = new Date(events.end);
@@ -1157,6 +1168,39 @@ var Scheduler = (function (element, userConfigs) {
     sortDataDesc();
     refreshEvents();
   };
+  
+  editEvent = function (event) {
+    var length = configs.data.length;
+    for (var i = 0; i < length; i++) {
+      if (event.$id == configs.data[i].$id) {
+        configs.data[i].title = event.title;
+        configs.data[i].start = new Date(event.start);
+        if (event.end) {
+          configs.data[i].end = new Date(event.end);
+        }
+        else {
+          configs.data[i].end = new Date(event.start);
+          configs.data[i].end.setHours(configs.data[i].end.getHours() + 24);
+        }
+        break;
+      }
+    }
+    
+    sortDataDesc();
+    refreshEvents();
+  };
+  
+  deleteEvent = function (event) {
+    configs.data = configs.data.filter(function (el) {
+      // Check if start or end day is in between week, else check if start and end day is overlapping week
+      return el.$id != event.$id;
+    });
+    
+    sortDataDesc();
+    refreshEvents();
+    
+    return event;
+  }
   
   refreshHeader = function () {
     $('.sc-header').find('.sc-table-row-th > span.sc-header-day-text').each(function() {
@@ -1219,7 +1263,9 @@ var Scheduler = (function (element, userConfigs) {
     refreshView: refreshView,
     prevView: prevView,
     nextView: nextView,
-    addEvents: addEvents
+    addEvents: addEvents,
+    editEvent: editEvent,
+    deleteEvent: deleteEvent
   };
 });
 
