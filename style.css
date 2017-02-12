@@ -56,6 +56,11 @@
 	padding: 2px;
 }
 
+.sc .sc-day > a:hover {
+    color: #808080;
+    cursor: pointer;
+}
+
 .sc .sc-other-month {
 	color: #aaa;
 }

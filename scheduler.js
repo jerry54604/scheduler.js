@@ -202,6 +202,7 @@ var Scheduler = (function (element, userConfigs) {
       $tblCalendar.addClass('sc-table');
       var $trCalendar = $(document.createElement('div'));
       $trCalendar.addClass('sc-table-row');
+      $trCalendar.on('click', 'a', function () { gotoDay($(this).attr('data-goto')); });
 
       var $divEventWrapper = $(document.createElement('div'));
       $divEventWrapper.addClass('sc-event-row-wrapper');
@@ -787,6 +788,12 @@ var Scheduler = (function (element, userConfigs) {
       configs.mode = 'day';
       refreshView();
     }
+  };
+  
+  gotoDay = function (dt) {
+    var targetDate = new Date(dt);
+    renderDate = targetDate;
+    setDayMode();
   };
 
   setMonthEvent = function (event, $parent = $('.sc .sc-month-body')) {
