@@ -2,7 +2,17 @@ var Scheduler = (function (element, userConfigs) {
   configs = {
     date: new Date(),
     data: [],
-    mode: 'month'
+    mode: 'month',
+    onInit: function (e) { },
+    onRendered: function (e) { },
+    onRefreshed: function (e) { },
+    onNextView: function (e) { },
+    onPreviousView: function (e) { },
+    onDataBinding: function (e) { },
+    onDataBound: function (e) { },
+    onDataAdd: function (e) { },
+    onDataEdit: function (e) { },
+    onDataDelete: function (e) { }
   };
 
   days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -18,6 +28,7 @@ var Scheduler = (function (element, userConfigs) {
 
   init = function () {
     setConfig();
+    dispatchEvent(configs.onInit);
     processData();
     shortDisplay = window.matchMedia('(max-width: 699px)').matches;
     renderDate = new Date(configs.date.getFullYear(), configs.date.getMonth(), 1);
@@ -26,6 +37,7 @@ var Scheduler = (function (element, userConfigs) {
     renderBody();
     $element.append($currentView);
     $element.addClass('sc');
+    dispatchEvent(configs.onRendered);
   };
 
   setConfig = function () {
@@ -40,6 +52,7 @@ var Scheduler = (function (element, userConfigs) {
       clearBody();
       renderBody(data);
       $currentView.show();
+      dispatchEvent(configs.onRefreshed);
     });
   };
 
@@ -247,6 +260,7 @@ var Scheduler = (function (element, userConfigs) {
   };
 
   renderMonthEvent = function ($parent, data) {
+    dispatchEvent(configs.onDataBinding);
     var firstDateMonth = new Date(renderDate.getFullYear(), renderDate.getMonth(), 1);
     var lastDateMonth = new Date(renderDate.getFullYear(), renderDate.getMonth() + 1, 0);
 
@@ -267,6 +281,7 @@ var Scheduler = (function (element, userConfigs) {
     for (var i = 0; i < thisMonthEvents.length; i++) {
       setMonthEvent(thisMonthEvents[i], $parent);
     }
+    dispatchEvent(configs.onDataBound);
   };
 
   renderWeek = function (data) {
@@ -435,6 +450,7 @@ var Scheduler = (function (element, userConfigs) {
   };
 
   renderWeekEvent = function ($parent, data) {
+    dispatchEvent(configs.onDataBinding);
     var firstDayWeek = new Date(renderDate);
     firstDayWeek.setDate(firstDayWeek.getDate() - renderDate.getDay());
     
@@ -509,6 +525,7 @@ var Scheduler = (function (element, userConfigs) {
     for (var i = 0; i < thisWeekEvents.length; i++) {
       setWeekEvent(thisWeekEvents[i], $parent);
     }
+    dispatchEvent(configs.onDataBound);
   };
 
   renderDay = function (data) {
@@ -665,6 +682,7 @@ var Scheduler = (function (element, userConfigs) {
   };
 
   renderDayEvent = function ($parent, data) {
+    dispatchEvent(configs.onDataBinding);
     var thisDayEvents = data.filter(function (el) {
       var start = new Date(el.start);
       var end = new Date(el.end);
@@ -734,6 +752,7 @@ var Scheduler = (function (element, userConfigs) {
     for (var i = 0; i < thisDayEvents.length; i++) {
       setDayEvent(thisDayEvents[i], $parent);
     }
+    dispatchEvent(configs.onDataBound);
   };
 
   renderFooter = function () {
@@ -744,6 +763,7 @@ var Scheduler = (function (element, userConfigs) {
   };
 
   prevView = function () {
+    dispatchEvent(configs.onPreviousView);
     if (configs.mode == 'month') {
       renderDate.setMonth(renderDate.getMonth() - 1);
     }
@@ -757,6 +777,7 @@ var Scheduler = (function (element, userConfigs) {
   };
 
   nextView = function () {
+    dispatchEvent(configs.onNextView);
     if (configs.mode == 'month') {
       renderDate.setMonth(renderDate.getMonth() + 1);
     }
@@ -1125,11 +1146,9 @@ var Scheduler = (function (element, userConfigs) {
       });
       $('.sc-time-event-item').remove();
     }
-  }
+  };
   
-  refreshEvents = function () {
-    clearEvents();
-    
+  loadEvents = function () {
     if (configs.mode == 'month') {
       renderMonthEvent($('.sc-month-body > tr > td'), configs.data);
     }
@@ -1141,7 +1160,13 @@ var Scheduler = (function (element, userConfigs) {
     }
   };
   
+  refreshEvents = function () {
+    clearEvents();
+    loadEvents();
+  };
+  
   addEvents = function (events) {
+    dispatchEvent(configs.onDataAdd, { event: events });
     if (events instanceof Array) {      
       configs.data = configs.data.concat(events.map(function (item, index) {
         item.start = new Date(item.start);
@@ -1177,6 +1202,7 @@ var Scheduler = (function (element, userConfigs) {
   };
   
   editEvent = function (event) {
+    dispatchEvent(configs.onDataEdit, { event: event });
     var length = configs.data.length;
     for (var i = 0; i < length; i++) {
       if (event.$id == configs.data[i].$id) {
@@ -1198,15 +1224,18 @@ var Scheduler = (function (element, userConfigs) {
   };
   
   deleteEvent = function (event) {
+    dispatchEvent(configs.onDataDelete, { event: event });
+    var deletedEvent = configs.data.filter(function (el) {
+      return el.$id == event.$id;
+    });
     configs.data = configs.data.filter(function (el) {
-      // Check if start or end day is in between week, else check if start and end day is overlapping week
       return el.$id != event.$id;
     });
     
     sortDataDesc();
     refreshEvents();
     
-    return event;
+    return deletedEvent;
   }
   
   refreshHeader = function () {
@@ -1262,6 +1291,28 @@ var Scheduler = (function (element, userConfigs) {
       shortDisplay = e.matches;
     }
   });
+  
+  dispatchEvent = function (e) {
+    if (typeof e == 'function') {
+      e.apply(this, Array.prototype.slice.call(arguments, 1));
+    }
+  };
+  
+  source = {
+    load: function () {
+      this.read(this.afterRead);
+    },
+    
+    read: function (response) {
+      response(configs.data);
+    },
+    
+    afterRead: function (data) {
+      configs.data = data;
+      processData();
+      refreshEvents();
+    }
+  }
 
   init();
 
@@ -1272,7 +1323,10 @@ var Scheduler = (function (element, userConfigs) {
     nextView: nextView,
     addEvents: addEvents,
     editEvent: editEvent,
-    deleteEvent: deleteEvent
+    deleteEvent: deleteEvent,
+    source: {
+      load: source.load
+    }
   };
 });
 
