@@ -903,11 +903,11 @@ var Scheduler = (function (element, userConfigs) {
         var row = $parentTable[0].rows[$startTd[0].closest('tr').rowIndex];
 
         for (var i = colIndex, cell; cell = row.cells[i]; i++) {
-          if ($(cell).html() != '' || $(cell).css('display') == 'none') {
-            createNewRow = true;
+          if (i >= days) {
             break;
           }
-          else if (colIndex > days) {
+          else if ($(cell).html() != '' || $(cell).css('display') == 'none') {
+            createNewRow = true;
             break;
           }
         }
