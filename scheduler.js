@@ -25,6 +25,7 @@ var Scheduler = (function (element, userConfigs) {
   $divToolbar = $(document.createElement('div'));
   mediaQuery = window.matchMedia('(max-width: 699px)');
   eventCount = 0;
+  eventDragging = null;
 
   init = function () {
     setConfig();
@@ -42,7 +43,12 @@ var Scheduler = (function (element, userConfigs) {
 
   setConfig = function () {
     for (var key in userConfigs) {
-      configs[key] = userConfigs[key];
+      if (key == 'source') {
+        
+      }
+      else {
+        configs[key] = userConfigs[key];
+      }
     }
   };
 
@@ -216,9 +222,13 @@ var Scheduler = (function (element, userConfigs) {
       var $trCalendar = $(document.createElement('div'));
       $trCalendar.addClass('sc-table-row');
       $trCalendar.on('click', 'a', function () { gotoDay($(this).attr('data-goto')); });
+      $divRow.on('dragenter', '.sc-day', eventDragEnter);
+      $divRow.on('dragleave', '.sc-day', eventDragLeave);
 
       var $divEventWrapper = $(document.createElement('div'));
       $divEventWrapper.addClass('sc-event-row-wrapper');
+      $divEventWrapper.on('dragstart', '.sc-event-items, .sc-event-item', eventDragStart);
+      $divEventWrapper.on('dragend', '.sc-event-items, .sc-event-item', eventDragEnd);
       var $tblEvent = $(document.createElement('table'));
       var $tbdEvent = $(document.createElement('tbody'));
       var $trEvent = $(document.createElement('tr'));
@@ -824,6 +834,7 @@ var Scheduler = (function (element, userConfigs) {
       $divEvent = $(document.createElement('div'));
       $divEvent.addClass('sc-event-item');
       $divEvent.attr('data-identity', event.$id);
+      $divEvent.attr('draggable', true);
       $divEvent.html('<span>' + start.toLocaleTimeString() + '</span><span>' + title + '</span>');
 
     if (start.toDateString() == end.toDateString()) {
@@ -911,6 +922,7 @@ var Scheduler = (function (element, userConfigs) {
                 var $divEvents = $(document.createElement('div'));
                 $divEvents.addClass('sc-event-items');
                 $divEvents.attr('data-identity', event.$id);
+                $divEvents.attr('draggable', true);
                 $divEvents.css({ top: newRow.rowIndex * -1.6 });
                 $divEvents.html('<span>' + title + '</span>');
                 $(cell).attr('colspan', colspan);
@@ -933,6 +945,7 @@ var Scheduler = (function (element, userConfigs) {
               if (days == 0 || colIndex == 7) {
                 var $divEvents = $(document.createElement('div'));
                 $divEvents.addClass('sc-event-items');
+                $divEvents.attr('draggable', true);
                 $divEvents.attr('data-identity', event.$id);
                 $divEvents.html('<span>' + title + '</span>');
                 $(cell).attr('colspan', colspan);
@@ -955,6 +968,7 @@ var Scheduler = (function (element, userConfigs) {
       title = event.title,
       $divEvent = $(document.createElement('div'));
       $divEvent.attr('data-identity', event.$id);
+      $divEvent.attr('draggable', true);
     
     if (start.toDateString() == end.toDateString()) {
       $divEvent.html('<span>' + formatNumber(start.getHours()) + formatNumber(start.getMinutes())
@@ -1057,6 +1071,7 @@ var Scheduler = (function (element, userConfigs) {
       title = event.title,
       $divEvent = $(document.createElement('div'));
       $divEvent.attr('data-identity', event.$id);
+      $divEvent.attr('draggable', true);
     
     if (start.toDateString() == end.toDateString()) {
       $divEvent.html('<span>' + formatNumber(start.getHours()) + formatNumber(start.getMinutes()) 
@@ -1312,7 +1327,60 @@ var Scheduler = (function (element, userConfigs) {
       processData();
       refreshEvents();
     }
-  }
+  };
+  
+  eventDragStart = function (e) {
+    var indentity = $(this).attr('data-identity');
+    $('[data-identity=' + indentity + ']').addClass('dragged');
+    setTimeout(function () { $('.sc .sc-view').addClass('dragging'); }, 100);
+    eventDragging = configs.data.filter(function (el) {
+      return el.$id == indentity;
+    })[0];
+  };
+  
+  eventDragEnter = function (e) {
+    $(this).addClass('drag-over');
+    var colIndex = $(this).index();
+    var rowIndex = $(this).closest('.sc-week-row').index();
+    var days = daysBetween(eventDragging.start.toDateString(), eventDragging.end.toDateString()) + 1;
+    setTimeout(function () {
+      while (days > 0) {
+        var $row = $('.sc .sc-week-row').eq(rowIndex);
+        
+        if ($row.length == 0) {
+          break;
+        }
+        
+        var $col = $row.find('.sc-week-row-wrapper .sc-day').eq(colIndex);
+        $col.addClass('drag-over');
+        
+        if (colIndex == 6) {
+          colIndex = 0;
+          rowIndex++;
+        }
+        else {
+          colIndex++;
+        }
+        days--;
+      }
+    }, 100);
+  };
+  
+  eventDragOver = function (e) {
+  };
+  
+  eventDragLeave = function (e) {
+    $('.drag-over').removeClass('drag-over');
+  };
+  
+  eventDragEnd = function (e) {
+    $('[data-identity=' + $(this).attr('data-identity') + ']').removeClass('dragged');
+    $('.sc .sc-view').removeClass('dragging');
+    eventDragging = null;
+  };
+  
+  eventDrop = function (e) {
+  };
 
   init();
 

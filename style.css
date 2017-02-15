@@ -121,6 +121,22 @@
     margin-top: 2px;
 }
 
+.sc .sc-view.dragging .sc-week-row-wrapper {
+    z-index: 1;
+}
+
+.sc .sc-view.dragging .sc-event-row-wrapper {
+    z-index: 0;
+}
+
+.sc .sc-event-item.dragged, .sc .sc-event-items.dragged {
+    opacity: 0.5;
+}
+
+.sc .sc-day.drag-over {
+    background: rgba(125, 185, 232, 0.4)
+}
+
 @media (max-width: 699px) {
 	.sc .sc-event-row-wrapper td {
 		position: relative;
