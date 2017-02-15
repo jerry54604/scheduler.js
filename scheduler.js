@@ -285,6 +285,8 @@ var Scheduler = (function (element, userConfigs) {
     var thisMonthEvents = data.filter(function (el) {
       var start = new Date(el.start);
       var end = new Date(el.end);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
 
       // Check if start or end day is in between calendar dates, else check if start and end day is overlapping calendar dates
       return (start >= calendarStartDate && start <= calendarEndDate) || (end >= calendarStartDate && end <= calendarEndDate) || (start <= calendarStartDate && end >= calendarEndDate);
@@ -472,6 +474,8 @@ var Scheduler = (function (element, userConfigs) {
     var thisWeekEvents = data.filter(function (el) {
       var start = new Date(el.start);
       var end = new Date(el.end);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
 
       // Check if start or end day is in between week, else check if start and end day is overlapping week
       return (start >= firstDayWeek && start <= lastDayWeek) || (end >= firstDayWeek && end <= lastDayWeek) || (start <= firstDayWeek && end >= lastDayWeek);
@@ -698,6 +702,8 @@ var Scheduler = (function (element, userConfigs) {
     var thisDayEvents = data.filter(function (el) {
       var start = new Date(el.start);
       var end = new Date(el.end);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
 
       // Check if start or end day is in between week, else check if start and end day is overlapping week
       return (start.toDateString() == renderDate.toDateString() || end.toDateString() == renderDate.toDateString()) || (start <= renderDate && end >= renderDate);
@@ -837,7 +843,7 @@ var Scheduler = (function (element, userConfigs) {
       $divEvent.addClass('sc-event-item');
       $divEvent.attr('data-identity', event.$id);
       $divEvent.attr('draggable', true);
-      $divEvent.html('<span>' + start.toLocaleTimeString() + '</span><span>' + title + '</span>');
+      $divEvent.html('<span>' + formatNumber(start.getHours()) + ':' + formatNumber(start.getMinutes()) + '</span> <span>' + title + '</span>');
 
     if (start.toDateString() == end.toDateString()) {
       var $startTd = $parent.find('td[data-date="' + start.toDateString() + '"]');
@@ -1386,13 +1392,13 @@ var Scheduler = (function (element, userConfigs) {
   eventDrop = function (e) {
     if (eventDragging) {
       if (eventDragging.start.toDateString() != $(this).attr('data-date')) {
-        var newStart = new Date($(this).attr('data-date') + ' ' + eventDragging.start.toTimeString());
+        var newStart = $(this).attr('data-date');
         var days = daysBetween(eventDragging.start.toDateString(), eventDragging.end.toDateString());
         
-        eventDragging.start = new Date(newStart);
-        eventDragging.end = new Date(newStart);
-        eventDragging.end.setDate(newStart.getDate() + days);
-        
+        eventDragging.start = new Date(newStart  + ' ' + eventDragging.start.toTimeString());
+        eventDragging.end = new Date(newStart  + ' ' + eventDragging.end.toTimeString());
+        eventDragging.end.setDate(eventDragging.end.getDate() + days);
+        console.log(eventDragging);
         editEvent(eventDragging);
         
         $('.drag-over').removeClass('drag-over');
