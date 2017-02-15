@@ -223,6 +223,8 @@ var Scheduler = (function (element, userConfigs) {
       $trCalendar.addClass('sc-table-row');
       $trCalendar.on('click', 'a', function () { gotoDay($(this).attr('data-goto')); });
       $divRow.on('dragenter', '.sc-day', eventDragEnter);
+      $divRow.on('dragover', '.sc-day', eventDragOver);
+      $divRow.on('drop', '.sc-day', eventDrop);
 
       var $divEventWrapper = $(document.createElement('div'));
       $divEventWrapper.addClass('sc-event-row-wrapper');
@@ -238,6 +240,7 @@ var Scheduler = (function (element, userConfigs) {
         var $aCalendar = $(document.createElement('a'));
         $thCalendar.addClass('sc-day');
         $thCalendar.addClass('sc-' + shortDays[currentDate.getDay()]);
+        $thCalendar.attr('data-date', currentDate.toDateString());
 
         if (currentDate.getMonth() != renderDate.getMonth()) {
           $thCalendar.addClass('sc-other-month');
@@ -1338,33 +1341,36 @@ var Scheduler = (function (element, userConfigs) {
   };
   
   eventDragEnter = function (e) {
-    $(this).addClass('drag-over');
-    var colIndex = $(this).index();
-    var rowIndex = $(this).closest('.sc-week-row').index();
-    var days = daysBetween(eventDragging.start.toDateString(), eventDragging.end.toDateString()) + 1;
-    $('.drag-over').removeClass('drag-over');
-    while (days > 0) {
-      var $row = $('.sc .sc-week-row').eq(rowIndex);
-      
-      if ($row.length == 0) {
-        break;
+    if (eventDragging) {
+      $(this).addClass('drag-over');
+      var colIndex = $(this).index();
+      var rowIndex = $(this).closest('.sc-week-row').index();
+      var days = daysBetween(eventDragging.start.toDateString(), eventDragging.end.toDateString()) + 1;
+      $('.drag-over').removeClass('drag-over');
+      while (days > 0) {
+        var $row = $('.sc .sc-week-row').eq(rowIndex);
+        
+        if ($row.length == 0) {
+          break;
+        }
+        
+        var $col = $row.find('.sc-week-row-wrapper .sc-day').eq(colIndex);
+        $col.addClass('drag-over');
+        
+        if (colIndex == 6) {
+          colIndex = 0;
+          rowIndex++;
+        }
+        else {
+          colIndex++;
+        }
+        days--;
       }
-      
-      var $col = $row.find('.sc-week-row-wrapper .sc-day').eq(colIndex);
-      $col.addClass('drag-over');
-      
-      if (colIndex == 6) {
-        colIndex = 0;
-        rowIndex++;
-      }
-      else {
-        colIndex++;
-      }
-      days--;
     }
   };
   
   eventDragOver = function (e) {
+    e.preventDefault();
   };
   
   eventDragLeave = function (e) {
@@ -1378,6 +1384,21 @@ var Scheduler = (function (element, userConfigs) {
   };
   
   eventDrop = function (e) {
+    if (eventDragging) {
+      if (eventDragging.start.toDateString() != $(this).attr('data-date')) {
+        var newStart = new Date($(this).attr('data-date') + ' ' + eventDragging.start.toTimeString());
+        var days = daysBetween(eventDragging.start.toDateString(), eventDragging.end.toDateString());
+        
+        eventDragging.start = new Date(newStart);
+        eventDragging.end = new Date(newStart);
+        eventDragging.end.setDate(newStart.getDate() + days);
+        
+        editEvent(eventDragging);
+        
+        $('.drag-over').removeClass('drag-over');
+        $('.sc .sc-view').removeClass('dragging');
+      }
+    }
   };
 
   init();
