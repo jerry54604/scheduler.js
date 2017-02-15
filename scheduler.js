@@ -223,7 +223,6 @@ var Scheduler = (function (element, userConfigs) {
       $trCalendar.addClass('sc-table-row');
       $trCalendar.on('click', 'a', function () { gotoDay($(this).attr('data-goto')); });
       $divRow.on('dragenter', '.sc-day', eventDragEnter);
-      $divRow.on('dragleave', '.sc-day', eventDragLeave);
 
       var $divEventWrapper = $(document.createElement('div'));
       $divEventWrapper.addClass('sc-event-row-wrapper');
@@ -1343,38 +1342,37 @@ var Scheduler = (function (element, userConfigs) {
     var colIndex = $(this).index();
     var rowIndex = $(this).closest('.sc-week-row').index();
     var days = daysBetween(eventDragging.start.toDateString(), eventDragging.end.toDateString()) + 1;
-    setTimeout(function () {
-      while (days > 0) {
-        var $row = $('.sc .sc-week-row').eq(rowIndex);
-        
-        if ($row.length == 0) {
-          break;
-        }
-        
-        var $col = $row.find('.sc-week-row-wrapper .sc-day').eq(colIndex);
-        $col.addClass('drag-over');
-        
-        if (colIndex == 6) {
-          colIndex = 0;
-          rowIndex++;
-        }
-        else {
-          colIndex++;
-        }
-        days--;
+    $('.drag-over').removeClass('drag-over');
+    while (days > 0) {
+      var $row = $('.sc .sc-week-row').eq(rowIndex);
+      
+      if ($row.length == 0) {
+        break;
       }
-    }, 100);
+      
+      var $col = $row.find('.sc-week-row-wrapper .sc-day').eq(colIndex);
+      $col.addClass('drag-over');
+      
+      if (colIndex == 6) {
+        colIndex = 0;
+        rowIndex++;
+      }
+      else {
+        colIndex++;
+      }
+      days--;
+    }
   };
   
   eventDragOver = function (e) {
   };
   
   eventDragLeave = function (e) {
-    $('.drag-over').removeClass('drag-over');
   };
   
   eventDragEnd = function (e) {
     $('[data-identity=' + $(this).attr('data-identity') + ']').removeClass('dragged');
+    $('.drag-over').removeClass('drag-over');
     $('.sc .sc-view').removeClass('dragging');
     eventDragging = null;
   };
